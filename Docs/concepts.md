@@ -4,6 +4,16 @@ A reference for key concepts encountered during research and development.
 
 ---
 
+## Index
+
+1. [RAG (Retrieval-Augmented Generation)](#rag-retrieval-augmented-generation)
+   - [Embeddings](#embeddings)
+   - [Augment Phase](#augment-phase)
+   - [Generate Phase](#generate-phase)
+2. [LLM Calls via API: Possible Approaches](#llm-calls-via-api-possible-approaches)
+
+---
+
 ## RAG (Retrieval-Augmented Generation)
 
 Instead of an AI answering from memory alone, it first **looks up relevant information** and then **generates an answer using that information**.
@@ -91,7 +101,7 @@ Retrieve similar past cases
 
 ---
 
-## Embeddings
+### Embeddings
 
 Embeddings are **numerical representations** of text (or data) that capture meaning. They allow computers to measure **similarity** between pieces of content.
 
@@ -136,7 +146,7 @@ Text gets converted into a list of numbers (typically 768-1536 numbers):
 
 ---
 
-## Augment Phase
+### Augment Phase
 
 After retrieval finds similar past cases, the **augment phase** combines everything into a prompt for the AI. This is where context is assembled.
 
@@ -197,7 +207,7 @@ Provide analysis in the same style as the examples above.
 
 ---
 
-## Generate Phase
+### Generate Phase
 
 The AI receives the augmented prompt and produces an analysis. This is where the actual output gets created.
 
@@ -257,5 +267,101 @@ Expert reviews output
 ```
 
 The cycle continues: each expert interaction makes the system smarter.
+
+---
+
+## LLM Calls via API: Possible Approaches
+
+When building applications that use LLMs (like the Expert Learning System), you need a way to call the model programmatically. Here are the main approaches:
+
+### Option 1: Paid API Services
+
+Direct API access from major providers. Pay-per-use based on tokens (input/output text).
+
+| Provider | Package | Model Examples | Notes |
+|----------|---------|----------------|-------|
+| **Anthropic** | `anthropic` | Claude Opus, Sonnet, Haiku | High quality, good for analysis |
+| **OpenAI** | `openai` | GPT-4, GPT-4o | Well-documented, widely used |
+| **Google** | `google-genai` | Gemini 1.5 Pro/Flash | Has free tier (15 req/min on Flash) |
+
+**Setup pattern:**
+```bash
+pip install anthropic  # or openai, google-genai
+# Get API key from provider's console
+# Add billing/payment method (not needed for Google free tier)
+# Use key in your code
+```
+
+**Cost:** Typically $1-20/month for learning and small projects. Scales with usage.
+
+**Note:** A Claude Pro subscription ($20/month for claude.ai chat) is separate from API access. They require separate accounts and billing.
+
+### Option 2: Local LLMs (Free)
+
+Run open-source models on your own computer. No API key or ongoing costs.
+
+**Tools:**
+- **Ollama** - Simple CLI tool, easiest to set up
+- **LM Studio** - GUI application, beginner-friendly
+- **llama.cpp** - Lower-level, more control
+
+**Popular local models:**
+- Llama 3 (Meta) - Best overall quality
+- Mistral - Good balance of speed/quality
+- Phi-3 (Microsoft) - Smaller, faster
+
+**Example with Ollama:**
+```bash
+# Install Ollama from ollama.com, then:
+ollama pull llama3
+ollama run llama3 "Analyze this data..."
+```
+
+**Hardware requirements:**
+- Minimum: 8GB RAM
+- Recommended: 16GB+ RAM
+- Better with dedicated GPU (but not required)
+
+**Tradeoffs:**
+| Pros | Cons |
+|------|------|
+| Completely free | Requires decent hardware |
+| Private (data stays local) | Quality below Claude/GPT-4 |
+| No rate limits | Setup more complex |
+| Works offline | Slower on CPU-only machines |
+
+### Option 3: Hybrid/Manual Approach
+
+Use a chat interface (like Claude Pro or Claude Code) manually instead of automating.
+
+**Workflow:**
+1. Prepare your data
+2. Paste into chat interface
+3. Ask for analysis
+4. Copy results out
+
+**Best for:**
+- Learning and experimentation
+- Low-volume analysis
+- Prototyping before building automation
+
+### Which Approach to Choose?
+
+| Situation | Recommended Approach |
+|-----------|---------------------|
+| Learning concepts | Manual via Claude Code (no extra cost) |
+| Want to code without paying | Local LLM (Ollama) |
+| Building real application | Paid API (Anthropic or OpenAI) |
+| Need free + decent quality | Google Gemini free tier |
+| Data privacy critical | Local LLM |
+
+### Switching Between Providers
+
+The code structure stays similar across providers. Main changes:
+- Import statement
+- Client initialization
+- Model name in API call
+
+This makes it relatively easy to start with one provider and switch later.
 
 ---

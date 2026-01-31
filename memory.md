@@ -14,6 +14,18 @@ A human-in-the-loop AI system that learns from expert annotations to eventually 
 3. The process is repeated over and over, with AI learning what the analyst detects and documents
 4. Finally, when trained, the model will be able to produce a suggested analysis based on what it has learned
 
+## Software Prerequisites
+
+| Package | Install Command | Purpose |
+|---------|-----------------|---------|
+| google-genai | `pip install google-genai` | LLM API calls (Gemini) |
+
+## Preferences
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| LLM for trials | Google Gemini API (free tier) | Using `gemini-1.5-flash` model |
+
 ## Research
 
 ### System Type
