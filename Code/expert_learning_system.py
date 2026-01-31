@@ -16,9 +16,28 @@ import uuid
 from datetime import datetime
 from typing import List, Dict, Any
 import lancedb
-from lancedb.embeddings import get_registry
 from lancedb.pydantic import LanceModel, Vector
+from lancedb.embeddings import get_registry
 from google import genai
+
+
+# Define the embedding function globally
+gemini_embed = get_registry().get("gemini-text").create(
+    name="models/text-embedding-004"
+)
+
+
+class Annotation(LanceModel):
+    """Schema for expert annotations stored in LanceDB."""
+    annotation_id: str
+    timestamp: str
+    expert_id: str
+    dataset_summary: str
+    expert_analysis: str
+    patterns: str
+    tags: str
+    text: str = gemini_embed.SourceField()  # Field to embed
+    vector: Vector(gemini_embed.ndims()) = gemini_embed.VectorField(default=None)  # Auto-generated
 
 class ExpertLearningSystem:
     """
@@ -39,12 +58,6 @@ class ExpertLearningSystem:
         if api_key is None:
             api_key = os.environ.get('GEMINI_API_KEY')
         self.gemini_client = genai.Client(api_key=api_key)
-
-        # Set up embedding function using Gemini
-        self.embed_model = get_registry().get("gemini-text").create(
-            name="models/text-embedding-004",
-            api_key=api_key
-        )
         
     def store_expert_annotation(
         self,
@@ -70,38 +83,33 @@ class ExpertLearningSystem:
 
         annotation_id = str(uuid.uuid4())
 
-        # Create the annotation record
-        record = {
-            "annotation_id": annotation_id,
-            "timestamp": datetime.now().isoformat(),
-            "expert_id": expert_id,
-            "dataset_summary": dataset_summary,
-            "expert_analysis": expert_analysis,
-            "patterns": json.dumps(patterns_found),
-            "tags": ",".join(tags),
-            "text": expert_analysis  # This field will be embedded
-        }
+        # Create the annotation record using Pydantic model
+        record = Annotation(
+            annotation_id=annotation_id,
+            timestamp=datetime.now().isoformat(),
+            expert_id=expert_id,
+            dataset_summary=dataset_summary,
+            expert_analysis=expert_analysis,
+            patterns=json.dumps(patterns_found),
+            tags=",".join(tags),
+            text=expert_analysis  # This field will be embedded
+        )
 
         # Create table on first insert, or add to existing table
         if self.table is None:
             try:
                 self.table = self.db.open_table(self.table_name)
             except Exception:
-                # Table doesn't exist, create it
+                # Table doesn't exist, create it with schema
                 self.table = self.db.create_table(
                     self.table_name,
-                    data=[record],
-                    embedding_functions=[
-                        {"column": "text", "function": self.embed_model}
-                    ]
+                    schema=Annotation
                 )
-                print(f"✓ Stored annotation {annotation_id}")
-                return annotation_id
 
-        # Add to existing table
+        # Add record to table
         self.table.add([record])
 
-        print(f"✓ Stored annotation {annotation_id}")
+        print(f"[OK] Stored annotation {annotation_id}")
         return annotation_id
     
     def retrieve_similar_analyses(
@@ -144,7 +152,7 @@ class ExpertLearningSystem:
             similar_analyses.append({
                 "id": row.get("annotation_id"),
                 "expert_analysis": row.get("expert_analysis"),
-                "similarity_score": 1 - row.get("_distance", 0),
+                "similarity_score": 1 / (1 + row.get("_distance", 0)),  # Normalize to 0-1 range
                 "metadata": {
                     "dataset_summary": row.get("dataset_summary"),
                     "tags": row.get("tags"),
@@ -403,7 +411,7 @@ def example_workflow():
         expert_id="analyst_jane"
     )
     
-    print(f"✓ Stored {3} expert annotations\n")
+    print(f"[OK] Stored {3} expert annotations\n")
     
     # Check system stats
     stats = system.get_system_stats()
@@ -439,7 +447,7 @@ def example_workflow():
     print("-" * 70)
     print(ai_result['analysis'])
     print("-" * 70)
-    print(f"\n✓ Used {ai_result['similar_examples_used']} similar expert examples")
+    print(f"\n[OK] Used {ai_result['similar_examples_used']} similar expert examples")
     
     print("\n" + "=" * 70)
     print("PHASE 3: Expert Reviews and Provides Feedback")
@@ -468,7 +476,7 @@ def example_workflow():
         expert_id="analyst_jane"
     )
     
-    print(f"✓ Incorporated expert feedback as annotation {feedback_id}")
+    print(f"[OK] Incorporated expert feedback as annotation {feedback_id}")
     
     print("\n" + "=" * 70)
     print("PHASE 4: System Has Learned - Next Analysis Will Be Better")
@@ -480,7 +488,7 @@ def example_workflow():
     
     print(f"""
     
-    ✓ Learning Loop Complete!
+    [OK] Learning Loop Complete!
     
     The system now has:
     - {final_stats['total_expert_annotations']} expert examples in knowledge base
@@ -526,10 +534,10 @@ def simulate_active_learning_workflow():
         
         # ACTIVE LEARNING: Only send to expert if confidence is low
         if result['confidence'] < 0.75:
-            print(f"⚠️  Low confidence ({result['confidence']:.2%}) - sending to expert")
+            print(f"[WARN]  Low confidence ({result['confidence']:.2%}) - sending to expert")
             # In real system, this would trigger expert review workflow
         else:
-            print(f"✓ High confidence ({result['confidence']:.2%}) - auto-approved")
+            print(f"[OK] High confidence ({result['confidence']:.2%}) - auto-approved")
             # AI analysis used without expert review
 
 
