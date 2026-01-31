@@ -11,30 +11,40 @@ This implementation shows:
 """
 
 import json
+import os
 import uuid
 from datetime import datetime
 from typing import List, Dict, Any
-import chromadb
-from chromadb.utils import embedding_functions
-import anthropic  # or use openai
+import lancedb
+from lancedb.embeddings import get_registry
+from lancedb.pydantic import LanceModel, Vector
+from google import genai
 
 class ExpertLearningSystem:
     """
     Main system class that manages the learning loop
     """
-    
-    def __init__(self, anthropic_api_key: str):
-        # Initialize ChromaDB (lightweight vector database)
-        self.chroma_client = chromadb.Client()
-        
-        # Create collection for storing annotations
-        self.collection = self.chroma_client.get_or_create_collection(
-            name="expert_annotations",
-            metadata={"description": "Expert analysis knowledge base"}
+
+    def __init__(self, api_key: str = None, db_path: str = "./lancedb"):
+        # Initialize LanceDB (vector database)
+        self.db = lancedb.connect(db_path)
+
+        # Create or open table for storing annotations
+        # Table will be created on first annotation
+        self.table_name = "expert_annotations"
+        self.table = None
+
+        # Initialize LLM client (using Google Gemini)
+        # Uses GEMINI_API_KEY environment variable if no key provided
+        if api_key is None:
+            api_key = os.environ.get('GEMINI_API_KEY')
+        self.gemini_client = genai.Client(api_key=api_key)
+
+        # Set up embedding function using Gemini
+        self.embed_model = get_registry().get("gemini-text").create(
+            name="models/text-embedding-004",
+            api_key=api_key
         )
-        
-        # Initialize LLM client (using Claude as example)
-        self.claude_client = anthropic.Anthropic(api_key=anthropic_api_key)
         
     def store_expert_annotation(
         self,
@@ -46,45 +56,51 @@ class ExpertLearningSystem:
     ) -> str:
         """
         Store an expert's annotation in the knowledge base
-        
+
         Args:
             dataset_summary: Summary of the dataset analyzed
             expert_analysis: Expert's natural language findings
             patterns_found: List of specific patterns detected
             tags: Categorization tags (e.g., ["anomaly", "revenue"])
             expert_id: Identifier for the expert
-            
+
         Returns:
             annotation_id: Unique ID for this annotation
         """
-        
+
         annotation_id = str(uuid.uuid4())
-        
+
         # Create the annotation record
-        annotation = {
+        record = {
             "annotation_id": annotation_id,
             "timestamp": datetime.now().isoformat(),
             "expert_id": expert_id,
             "dataset_summary": dataset_summary,
             "expert_analysis": expert_analysis,
-            "patterns_found": patterns_found,
-            "tags": tags
+            "patterns": json.dumps(patterns_found),
+            "tags": ",".join(tags),
+            "text": expert_analysis  # This field will be embedded
         }
-        
-        # Store in vector database
-        # The embedding is automatically created from the text
-        self.collection.add(
-            ids=[annotation_id],
-            documents=[expert_analysis],  # This gets embedded
-            metadatas=[{
-                "dataset_summary": dataset_summary,
-                "tags": ",".join(tags),
-                "expert_id": expert_id,
-                "timestamp": annotation["timestamp"],
-                "patterns": json.dumps(patterns_found)
-            }]
-        )
-        
+
+        # Create table on first insert, or add to existing table
+        if self.table is None:
+            try:
+                self.table = self.db.open_table(self.table_name)
+            except Exception:
+                # Table doesn't exist, create it
+                self.table = self.db.create_table(
+                    self.table_name,
+                    data=[record],
+                    embedding_functions=[
+                        {"column": "text", "function": self.embed_model}
+                    ]
+                )
+                print(f"✓ Stored annotation {annotation_id}")
+                return annotation_id
+
+        # Add to existing table
+        self.table.add([record])
+
         print(f"✓ Stored annotation {annotation_id}")
         return annotation_id
     
@@ -96,38 +112,48 @@ class ExpertLearningSystem:
     ) -> List[Dict[str, Any]]:
         """
         Retrieve similar past expert analyses
-        
+
         Args:
             dataset_summary: Summary of new dataset to analyze
             n_results: How many similar examples to retrieve
             tag_filter: Optional tag to filter by
-            
+
         Returns:
             List of similar past analyses
         """
-        
-        # Build query filter if tag specified
-        where_filter = None
+
+        # Check if table exists
+        if self.table is None:
+            try:
+                self.table = self.db.open_table(self.table_name)
+            except Exception:
+                return []  # No annotations stored yet
+
+        # Build and execute search query
+        query = self.table.search(dataset_summary).limit(n_results)
+
+        # Apply tag filter if specified
         if tag_filter:
-            where_filter = {"tags": {"$contains": tag_filter}}
-        
-        # Query the vector database
-        results = self.collection.query(
-            query_texts=[dataset_summary],
-            n_results=n_results,
-            where=where_filter
-        )
-        
+            query = query.where(f"tags LIKE '%{tag_filter}%'")
+
+        results = query.to_list()
+
         # Format results
         similar_analyses = []
-        for i in range(len(results['ids'][0])):
+        for row in results:
             similar_analyses.append({
-                "id": results['ids'][0][i],
-                "expert_analysis": results['documents'][0][i],
-                "similarity_score": 1 - results['distances'][0][i],  # Convert distance to similarity
-                "metadata": results['metadatas'][0][i]
+                "id": row.get("annotation_id"),
+                "expert_analysis": row.get("expert_analysis"),
+                "similarity_score": 1 - row.get("_distance", 0),
+                "metadata": {
+                    "dataset_summary": row.get("dataset_summary"),
+                    "tags": row.get("tags"),
+                    "expert_id": row.get("expert_id"),
+                    "timestamp": row.get("timestamp"),
+                    "patterns": row.get("patterns")
+                }
             })
-        
+
         return similar_analyses
     
     def generate_ai_analysis(
@@ -161,20 +187,14 @@ class ExpertLearningSystem:
             dataset_details,
             similar_analyses
         )
-        
-        # Call Claude API
-        response = self.claude_client.messages.create(
-            model="claude-opus-4-20250514",
-            max_tokens=2000,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+
+        # Call Gemini API
+        response = self.gemini_client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
         )
-        
-        ai_analysis = response.content[0].text
+
+        ai_analysis = response.text
         
         return {
             "analysis": ai_analysis,
@@ -269,9 +289,18 @@ Expert Corrections and Improvements:
     
     def get_system_stats(self) -> Dict[str, Any]:
         """Get statistics about the learning system"""
-        
-        total_annotations = self.collection.count()
-        
+
+        # Get annotation count from table
+        total_annotations = 0
+        if self.table is None:
+            try:
+                self.table = self.db.open_table(self.table_name)
+            except Exception:
+                pass  # Table doesn't exist yet
+
+        if self.table is not None:
+            total_annotations = len(self.table)
+
         # Could add more sophisticated metrics here
         return {
             "total_expert_annotations": total_annotations,
@@ -294,10 +323,8 @@ def example_workflow():
     5. System improves
     """
     
-    # Initialize system
-    system = ExpertLearningSystem(
-        anthropic_api_key="your-api-key-here"
-    )
+    # Initialize system (uses GEMINI_API_KEY environment variable)
+    system = ExpertLearningSystem()
     
     print("=" * 70)
     print("PHASE 1: Expert Annotates Initial Examples")
@@ -480,7 +507,7 @@ def simulate_active_learning_workflow():
     - Dramatically reduces annotation workload
     """
     
-    system = ExpertLearningSystem(anthropic_api_key="your-api-key-here")
+    system = ExpertLearningSystem()  # Uses GEMINI_API_KEY environment variable
     
     # Simulate multiple datasets to analyze
     datasets = [

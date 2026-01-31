@@ -19,12 +19,21 @@ A human-in-the-loop AI system that learns from expert annotations to eventually 
 | Package | Install Command | Purpose |
 |---------|-----------------|---------|
 | google-genai | `pip install google-genai` | LLM API calls (Gemini) |
+| lancedb | `pip install lancedb` | Vector database for RAG |
+
+## Environment Variables
+
+| Variable | Purpose | How to Set (Windows) |
+|----------|---------|---------------------|
+| GEMINI_API_KEY | Google Gemini API authentication | `[System.Environment]::SetEnvironmentVariable('GEMINI_API_KEY', 'your-key', 'User')` |
 
 ## Preferences
 
 | Setting | Value | Notes |
 |---------|-------|-------|
-| LLM for trials | Google Gemini API (free tier) | Using `gemini-1.5-flash` model |
+| LLM for trials | Google Gemini API (free tier) | Using `gemini-2.0-flash` model |
+| Vector DB | LanceDB | Compatible with Python 3.14 |
+| Embeddings | Gemini text-embedding-004 | Via LanceDB integration |
 
 ## Research
 
@@ -61,12 +70,12 @@ Expert corrects → Store corrections → Repeat (improves over time)
 ```
 
 ### Tools to Consider
-| Category | Options |
-|----------|---------|
-| Vector DB | ChromaDB (simple), Pinecone (production) |
-| LLM | GPT-4, Claude, Llama-3 |
-| Annotation | Prodigy ($390), Label Studio (free) |
-| Framework | LangChain, LlamaIndex |
+| Category | Options | Current Choice |
+|----------|---------|----------------|
+| Vector DB | ChromaDB, Pinecone, LanceDB | **LanceDB** (Python 3.14 compatible) |
+| LLM | GPT-4, Claude, Gemini, Llama-3 | **Gemini 2.0 Flash** (free tier) |
+| Annotation | Prodigy ($390), Label Studio (free) | TBD |
+| Framework | LangChain, LlamaIndex | Custom (for learning) |
 
 ### Estimated Timeline
 - **Weeks 1-4:** Expert labels initial examples (50-200)
@@ -93,7 +102,7 @@ AI Data Expert V1/
 │   ├── expert_learning_system_guide.md # Research guide by Claude
 │   └── concepts.md                     # Key concepts reference
 ├── Code/
-│   └── expert_learning_system.py       # RAG implementation (not yet reviewed/tested)
+│   └── expert_learning_system.py       # RAG implementation using Gemini + LanceDB
 ├── memory.md
 └── .gitignore
 ```
