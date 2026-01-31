@@ -100,7 +100,8 @@ Expert corrects → Store corrections → Repeat (improves over time)
 AI Data Expert V1/
 ├── Docs/
 │   ├── expert_learning_system_guide.md # Research guide by Claude
-│   └── concepts.md                     # Key concepts reference
+│   ├── concepts.md                     # Key concepts reference
+│   └── how_it_works.md                 # Simple explanation with example
 ├── Code/
 │   └── expert_learning_system.py       # RAG implementation using Gemini + LanceDB
 ├── memory.md

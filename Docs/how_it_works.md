@@ -1,0 +1,163 @@
+# How the Expert Learning System Works
+
+A simple explanation of the system and how it learns from expert annotations.
+
+---
+
+## The Core Idea
+
+The system teaches an AI to analyze data the way an expert would - by showing it examples.
+
+**Without this system:** AI guesses based on general knowledge (might miss domain-specific patterns)
+
+**With this system:** AI learns from real expert examples and mimics their approach
+
+---
+
+## The Learning Loop
+
+```
+1. Expert analyzes data       -->  Writes findings and tags patterns
+2. System stores the example  -->  Converts to embeddings for search
+3. New data arrives           -->  System finds similar past examples
+4. AI generates analysis      -->  Mimics the expert's style
+5. Expert reviews/corrects    -->  Corrections get stored
+6. Repeat                     -->  AI improves over time
+```
+
+---
+
+## What is an Annotation?
+
+An annotation is an expert's analysis of a dataset, containing:
+
+| Component | What it is |
+|-----------|------------|
+| Dataset Summary | Brief description of the data |
+| Expert Analysis | The expert's written findings and recommendations |
+| Patterns Found | Specific patterns detected (anomalies, trends, etc.) |
+| Tags | Categories for easy filtering (e.g., "revenue", "anomaly") |
+
+---
+
+## Concrete Example
+
+### The Data (Input)
+
+```
+Q1-Q4 2023 revenue data by region
+
+Observations:
+- Q3 had a 15% revenue drop across all regions
+- West region performs 22% above average
+- Q2 and Q4 appear to be peak quarters
+```
+
+### The Expert Annotation (Output)
+
+**Dataset Summary:**
+```
+Q1-Q4 2023 revenue data by region
+```
+
+**Expert Analysis:**
+```
+Key Findings:
+1. Significant anomaly in Q3 - revenue dropped 15% across all regions
+2. Investigation revealed system outage during migration
+3. Q4 shows recovery with 8% growth
+4. West region consistently outperforms (22% above average)
+5. Seasonality pattern: Q2 and Q4 are peak quarters
+
+Recommendations:
+- Exclude Q3 from baseline calculations
+- Focus growth investments in West region strategy
+- Prepare for seasonal spikes in Q2/Q4
+```
+
+**Patterns Found:**
+```json
+[
+  {"type": "anomaly", "location": "Q3", "severity": "high"},
+  {"type": "trend", "location": "West_region", "direction": "positive"},
+  {"type": "seasonality", "period": "quarterly", "peaks": ["Q2", "Q4"]}
+]
+```
+
+**Tags:**
+```
+revenue, anomaly, seasonality
+```
+
+---
+
+## What Happens Behind the Scenes
+
+### Step 1: Storing the Annotation
+
+When an expert saves their annotation:
+
+1. The analysis text gets converted to **embeddings** (a list of ~768 numbers)
+2. These numbers capture the "meaning" of the text
+3. Similar analyses will have similar numbers
+4. Everything gets stored in the vector database (LanceDB)
+
+### Step 2: Finding Similar Examples
+
+When new data arrives:
+
+1. The new data summary gets converted to embeddings
+2. System searches for annotations with similar embeddings
+3. Returns the top 3-5 most similar past analyses
+
+### Step 3: AI Generates Analysis
+
+The AI receives:
+- The similar past examples (showing how experts analyzed similar data)
+- The new data to analyze
+- Instructions to follow the expert's style
+
+The AI then produces an analysis mimicking the expert's approach.
+
+### Step 4: Expert Reviews
+
+The expert can:
+- **Accept** - Analysis is good, store it
+- **Edit** - Fix mistakes, store the corrected version
+- **Reject** - Write from scratch
+
+Any corrections become new training examples, making the system smarter.
+
+---
+
+## How It Improves Over Time
+
+| Phase | Expert Work | AI Capability |
+|-------|-------------|---------------|
+| Early (0-50 examples) | Does everything manually | Limited, often wrong |
+| Middle (50-200 examples) | Reviews AI suggestions, corrects often | Decent, needs guidance |
+| Late (200+ examples) | Reviews only edge cases | Handles most routine analyses |
+
+---
+
+## Key Terms
+
+| Term | Simple Definition |
+|------|-------------------|
+| **Annotation** | Expert's documented analysis of a dataset |
+| **Embedding** | Numbers representing the meaning of text |
+| **Vector Database** | Storage optimized for finding similar embeddings |
+| **RAG** | Retrieval-Augmented Generation - finding examples before generating |
+| **Similarity Score** | How close a past example is to the new data (0-100%) |
+| **Confidence** | How sure the AI is based on available examples |
+
+---
+
+## Files in This Project
+
+| File | Purpose |
+|------|---------|
+| `Code/expert_learning_system.py` | Main system code |
+| `lancedb/` | Vector database storage (local, not in git) |
+| `Docs/concepts.md` | Technical concepts reference |
+| `Docs/how_it_works.md` | This file - simple explanation |
