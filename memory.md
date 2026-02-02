@@ -101,9 +101,11 @@ AI Data Expert V1/
 ├── Docs/
 │   ├── expert_learning_system_guide.md              # Research guide by Claude
 │   ├── concepts.md                                  # Key concepts reference
-│   └── how_it_works_expert_learning_system_v1.md    # V1 explanation + what code does
+│   ├── how_it_works_expert_learning_system_v1.md    # V1 explanation + what code does
+│   └── how_it_works_export_db_v1.md                 # Export utility documentation
 ├── Code/
-│   └── expert_learning_system_v1.py                 # RAG implementation using Gemini + LanceDB
+│   ├── expert_learning_system_v1.py                 # RAG implementation using Gemini + LanceDB
+│   └── export_db_v1.py                              # Database export utility (CSV/JSON)
 ├── expert_learning_system_v1_db/                    # LanceDB database (local, not in git)
 ├── memory.md
 ├── requirements.txt                                 # Python dependencies
