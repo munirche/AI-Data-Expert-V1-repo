@@ -1,2 +1,4 @@
 google-genai
+google-generativeai
 lancedb
+pandas

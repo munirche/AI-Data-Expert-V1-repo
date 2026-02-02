@@ -22,7 +22,11 @@ def get_available_databases(search_path: str = ".") -> list:
 def get_tables(db_path: str) -> list:
     """Get all table names in a database."""
     db = lancedb.connect(db_path)
-    return db.table_names()
+    result = db.list_tables()
+    # list_tables() returns an object with .tables attribute
+    if hasattr(result, 'tables'):
+        return result.tables
+    return result
 
 
 def export_to_csv(db_path: str, table_name: str, output_path: str) -> int:
@@ -60,7 +64,9 @@ def export_to_json(db_path: str, table_name: str, output_path: str) -> int:
 def show_database_info(db_path: str):
     """Display information about a database."""
     db = lancedb.connect(db_path)
-    tables = db.table_names()
+    result = db.list_tables()
+    # list_tables() returns an object with .tables attribute
+    tables = result.tables if hasattr(result, 'tables') else result
 
     print(f"\nDatabase: {db_path}")
     print(f"Tables: {len(tables)}")

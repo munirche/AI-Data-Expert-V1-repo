@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 lancedb/
 *_db/
+*.csv
+*.json
