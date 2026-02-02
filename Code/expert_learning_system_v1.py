@@ -13,28 +13,48 @@ This implementation shows:
 import json
 import os
 import uuid
-import warnings
 from datetime import datetime
+from functools import cached_property
 from typing import List, Dict, Any
-
-# Suppress deprecation warning from google.generativeai (used by LanceDB embeddings)
-warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
-
-# Set GOOGLE_API_KEY from GEMINI_API_KEY if not already set
-# LanceDB embeddings look for GOOGLE_API_KEY, but we use GEMINI_API_KEY
-if os.environ.get('GOOGLE_API_KEY') is None and os.environ.get('GEMINI_API_KEY'):
-    os.environ['GOOGLE_API_KEY'] = os.environ.get('GEMINI_API_KEY')
 
 import lancedb
 from lancedb.pydantic import LanceModel, Vector
-from lancedb.embeddings import get_registry
+from lancedb.embeddings import register, TextEmbeddingFunction
 from google import genai
 
 
-# Define the embedding function globally
-gemini_embed = get_registry().get("gemini-text").create(
-    name="models/text-embedding-004"
-)
+@register("gemini-genai")
+class GeminiGenaiEmbedding(TextEmbeddingFunction):
+    """
+    Custom embedding function using google-genai (new package).
+    Avoids the deprecated google-generativeai package.
+    """
+    model_name: str = "text-embedding-004"
+
+    @cached_property
+    def _client(self):
+        api_key = os.environ.get('GEMINI_API_KEY')
+        return genai.Client(api_key=api_key)
+
+    def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings for a list of texts."""
+        embeddings = []
+        for text in texts:
+            result = self._client.models.embed_content(
+                model=self.model_name,
+                contents=text
+            )
+            embeddings.append(result.embeddings[0].values)
+        return embeddings
+
+    def ndims(self) -> int:
+        """Return embedding dimensions (768 for text-embedding-004)."""
+        return 768
+
+
+# Define the embedding function globally using our custom class
+from lancedb.embeddings import get_registry
+gemini_embed = get_registry().get("gemini-genai").create()
 
 
 class Annotation(LanceModel):
