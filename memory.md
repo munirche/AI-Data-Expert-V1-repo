@@ -126,10 +126,17 @@ This allows multiple versions to coexist during development.
 |------------|-------|------------------------------------------|
 | 01/30/2026 | 2     | Project setup, research, RAG concepts    |
 | 01/31/2026 | 2     | First functional script (expert_learning_system.py) |
+| 02/01/2026 | 2.5   | File versioning, export utility, API fixes, custom embeddings |
 
-**Total: 4 hours**
+**Total: 6.5 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.
-- **02/01/2026:** Added `dataset_details` field to store raw data alongside annotations. Previously only the summary and analysis were stored, not the actual data being analyzed.
+- **02/01/2026:**
+  - Added V1 versioning to scripts, databases, and documentation
+  - Created `export_db_v1.py` utility for CSV/JSON exports
+  - Fixed API key compatibility (GEMINI_API_KEY → GOOGLE_API_KEY)
+  - Added `dataset_details` field to store raw data with annotations
+  - Replaced deprecated `google-generativeai` with custom embedding using `google-genai`
+  - Added `requirements.txt` for dependency management
 
