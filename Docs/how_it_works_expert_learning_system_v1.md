@@ -1,6 +1,10 @@
-# How the Expert Learning System Works
+# How the Expert Learning System Works - V1
 
 A simple explanation of the system and how it learns from expert annotations.
+
+**Related files:**
+- Script: `Code/expert_learning_system_v1.py`
+- Database: `expert_learning_system_v1_db/`
 
 ---
 
@@ -157,7 +161,46 @@ Any corrections become new training examples, making the system smarter.
 
 | File | Purpose |
 |------|---------|
-| `Code/expert_learning_system.py` | Main system code |
-| `lancedb/` | Vector database storage (local, not in git) |
+| `Code/expert_learning_system_v1.py` | Main system code |
+| `expert_learning_system_v1_db/` | Vector database storage (local, not in git) |
 | `Docs/concepts.md` | Technical concepts reference |
-| `Docs/how_it_works.md` | This file - simple explanation |
+| `Docs/how_it_works_expert_learning_system_v1.md` | This file - simple explanation |
+
+---
+
+## What Happens When You Run the Script
+
+When you run `python Code/expert_learning_system_v1.py`, here's what happens:
+
+### Initialization
+1. **System starts** - Creates connection to LanceDB (stored in `./expert_learning_system_v1_db` folder)
+2. **Gemini client connects** - Uses your `GEMINI_API_KEY` environment variable
+
+### Phase 1: Store Expert Annotations
+The code stores 3 example annotations:
+
+| # | Dataset | What Expert Found |
+|---|---------|-------------------|
+| 1 | Q1-Q4 2023 revenue by region | Q3 anomaly, West region strong, seasonal pattern |
+| 2 | Customer churn Jan-Dec 2023 | Churn spike from competitor, high-value customers retained |
+| 3 | Website traffic 2023 | Mobile up, desktop down, July bounce rate spike |
+
+Each annotation:
+- Gets a unique ID
+- Text gets converted to **embeddings** (numbers representing meaning)
+- Stored in LanceDB vector database
+
+### Phase 2: AI Analyzes New Data
+1. **New dataset arrives**: Q1 2024 revenue data
+2. **Retrieval**: System searches LanceDB for similar past analyses (finds the Q1-Q4 2023 revenue annotation)
+3. **Prompt built**: Combines retrieved examples + new data + instructions
+4. **Gemini API called**: Generates analysis mimicking expert style
+5. **Confidence calculated**: Based on how similar the retrieved examples are
+
+### Phase 3: Expert Feedback
+1. Expert reviews AI output and provides corrections
+2. Corrected version gets stored as a new annotation
+3. Database now has 4 annotations (system got smarter)
+
+### Key Point
+**Each run adds to the database.** If you run it 3 times, you'll have 12 annotations (3 initial + 1 feedback) x 3 runs. The database folder persists between runs.

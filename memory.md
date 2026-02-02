@@ -99,22 +99,33 @@ Expert corrects → Store corrections → Repeat (improves over time)
 ```
 AI Data Expert V1/
 ├── Docs/
-│   ├── expert_learning_system_guide.md # Research guide by Claude
-│   ├── concepts.md                     # Key concepts reference
-│   └── how_it_works.md                 # Simple explanation with example
+│   ├── expert_learning_system_guide.md              # Research guide by Claude
+│   ├── concepts.md                                  # Key concepts reference
+│   └── how_it_works_expert_learning_system_v1.md    # V1 explanation + what code does
 ├── Code/
-│   └── expert_learning_system.py       # RAG implementation using Gemini + LanceDB
+│   └── expert_learning_system_v1.py                 # RAG implementation using Gemini + LanceDB
+├── expert_learning_system_v1_db/                    # LanceDB database (local, not in git)
 ├── memory.md
+├── requirements.txt                                 # Python dependencies
 └── .gitignore
 ```
+
+### File Naming Convention
+Scripts, databases, and documentation are versioned together:
+- Script: `<name>_v1.py`
+- Database: `<name>_v1_db/`
+- Documentation: `how_it_works_<name>_v1.md`
+
+This allows multiple versions to coexist during development.
 
 ## Time Log
 
 | Date       | Hours | Description                              |
 |------------|-------|------------------------------------------|
 | 01/30/2026 | 2     | Project setup, research, RAG concepts    |
+| 01/31/2026 | 2     | First functional script (expert_learning_system.py) |
 
-**Total: 2 hours**
+**Total: 4 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.

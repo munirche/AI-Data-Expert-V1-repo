@@ -44,7 +44,7 @@ class ExpertLearningSystem:
     Main system class that manages the learning loop
     """
 
-    def __init__(self, api_key: str = None, db_path: str = "./lancedb"):
+    def __init__(self, api_key: str = None, db_path: str = "./expert_learning_system_v1_db"):
         # Initialize LanceDB (vector database)
         self.db = lancedb.connect(db_path)
 
