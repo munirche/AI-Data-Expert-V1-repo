@@ -131,4 +131,5 @@ This allows multiple versions to coexist during development.
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.
+- **02/01/2026:** Added `dataset_details` field to store raw data alongside annotations. Previously only the summary and analysis were stored, not the actual data being analyzed.
 

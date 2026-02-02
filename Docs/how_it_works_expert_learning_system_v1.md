@@ -38,6 +38,7 @@ An annotation is an expert's analysis of a dataset, containing:
 | Component | What it is |
 |-----------|------------|
 | Dataset Summary | Brief description of the data |
+| Dataset Details | The actual raw data (tables, numbers, etc.) |
 | Expert Analysis | The expert's written findings and recommendations |
 | Patterns Found | Specific patterns detected (anomalies, trends, etc.) |
 | Tags | Categories for easy filtering (e.g., "revenue", "anomaly") |
@@ -62,6 +63,16 @@ Observations:
 **Dataset Summary:**
 ```
 Q1-Q4 2023 revenue data by region
+```
+
+**Dataset Details (Raw Data):**
+```
+Quarter | East   | West   | North  | South  | Total
+--------|--------|--------|--------|--------|--------
+Q1      | $2.0M  | $3.2M  | $1.8M  | $1.5M  | $8.5M
+Q2      | $2.3M  | $3.6M  | $2.0M  | $1.7M  | $9.6M
+Q3      | $1.7M  | $2.7M  | $1.5M  | $1.3M  | $7.2M
+Q4      | $2.1M  | $3.5M  | $2.0M  | $1.8M  | $9.4M
 ```
 
 **Expert Analysis:**

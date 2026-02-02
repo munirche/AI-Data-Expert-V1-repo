@@ -43,6 +43,7 @@ class Annotation(LanceModel):
     timestamp: str
     expert_id: str
     dataset_summary: str
+    dataset_details: str  # The actual raw data being analyzed
     expert_analysis: str
     patterns: str
     tags: str
@@ -72,6 +73,7 @@ class ExpertLearningSystem:
     def store_expert_annotation(
         self,
         dataset_summary: str,
+        dataset_details: str,
         expert_analysis: str,
         patterns_found: List[Dict[str, Any]],
         tags: List[str],
@@ -82,6 +84,7 @@ class ExpertLearningSystem:
 
         Args:
             dataset_summary: Summary of the dataset analyzed
+            dataset_details: The actual raw data (tables, numbers, etc.)
             expert_analysis: Expert's natural language findings
             patterns_found: List of specific patterns detected
             tags: Categorization tags (e.g., ["anomaly", "revenue"])
@@ -99,6 +102,7 @@ class ExpertLearningSystem:
             timestamp=datetime.now().isoformat(),
             expert_id=expert_id,
             dataset_summary=dataset_summary,
+            dataset_details=dataset_details,
             expert_analysis=expert_analysis,
             patterns=json.dumps(patterns_found),
             tags=",".join(tags),
@@ -283,6 +287,7 @@ Analysis:"""
         ai_analysis: str,
         expert_corrections: str,
         dataset_summary: str,
+        dataset_details: str,
         tags: List[str],
         expert_id: str
     ) -> str:
@@ -290,15 +295,16 @@ Analysis:"""
         When expert corrects AI analysis, store the corrected version
         This improves future analyses
         """
-        
+
         corrected_analysis = f"""AI Generated: {ai_analysis}
 
 Expert Corrections and Improvements:
 {expert_corrections}"""
-        
+
         # Store as a new expert annotation
         return self.store_expert_annotation(
             dataset_summary=dataset_summary,
+            dataset_details=dataset_details,
             expert_analysis=corrected_analysis,
             patterns_found=[{"type": "AI_corrected", "note": "This was an AI analysis corrected by expert"}],
             tags=tags + ["ai_corrected"],
@@ -351,6 +357,14 @@ def example_workflow():
     # Expert analyzes first dataset
     annotation_1 = system.store_expert_annotation(
         dataset_summary="Q1-Q4 2023 revenue data by region",
+        dataset_details="""
+        Quarter | East   | West   | North  | South  | Total
+        --------|--------|--------|--------|--------|--------
+        Q1      | $2.0M  | $3.2M  | $1.8M  | $1.5M  | $8.5M
+        Q2      | $2.3M  | $3.6M  | $2.0M  | $1.7M  | $9.6M
+        Q3      | $1.7M  | $2.7M  | $1.5M  | $1.3M  | $7.2M
+        Q4      | $2.1M  | $3.5M  | $2.0M  | $1.8M  | $9.4M
+        """,
         expert_analysis="""
         Key Findings:
         1. Significant anomaly in Q3 - revenue dropped 15% across all regions
@@ -358,7 +372,7 @@ def example_workflow():
         3. Q4 shows recovery with 8% growth
         4. West region consistently outperforms (22% above average)
         5. Seasonality pattern: Q2 and Q4 are peak quarters
-        
+
         Recommendations:
         - Exclude Q3 from baseline calculations
         - Focus growth investments in West region strategy
@@ -376,13 +390,29 @@ def example_workflow():
     # Expert analyzes second dataset
     annotation_2 = system.store_expert_annotation(
         dataset_summary="Customer churn data - Jan-Dec 2023",
+        dataset_details="""
+        Month     | Total Customers | Churned | Churn Rate | Competitor Event
+        ----------|-----------------|---------|------------|------------------
+        January   | 10,000          | 500     | 5.0%       | -
+        February  | 9,800           | 490     | 5.0%       | -
+        March     | 9,600           | 768     | 8.0%       | Competitor launches
+        April     | 9,200           | 1,012   | 11.0%      | -
+        May       | 8,500           | 1,020   | 12.0%      | -
+        June      | 7,800           | 702     | 9.0%       | -
+        ...
+
+        Segment Analysis:
+        - High-value (>$10k/yr): 3% churn
+        - Mid-tier ($5k-$10k/yr): 15% churn
+        - Low-tier (<$5k/yr): 18% churn
+        """,
         expert_analysis="""
         Key Findings:
         1. Churn rate increased from 5% to 12% between March-May
         2. Root cause: competitor launched similar product at 30% lower price
         3. High-value customers (>$10k/year) showed lower churn (3%)
         4. Most churn occurred in 30-60 day window after competitor launch
-        
+
         Recommendations:
         - Implement retention program for mid-tier customers
         - Price adjustment analysis for competitive positioning
@@ -397,16 +427,32 @@ def example_workflow():
         expert_id="analyst_jane"
     )
     
-    # Expert analyzes third dataset  
+    # Expert analyzes third dataset
     annotation_3 = system.store_expert_annotation(
         dataset_summary="Website traffic analysis - 2023 annual",
+        dataset_details="""
+        Month     | Mobile Sessions | Desktop Sessions | Mobile Conv | Desktop Conv | Bounce Rate
+        ----------|-----------------|------------------|-------------|--------------|------------
+        January   | 45,000          | 80,000           | 1.0%        | 3.5%         | 42%
+        February  | 48,000          | 78,000           | 1.1%        | 3.6%         | 41%
+        ...
+        July      | 72,000          | 68,000           | 1.2%        | 3.2%         | 58%
+        ...
+        December  | 85,000          | 65,000           | 1.2%        | 3.8%         | 40%
+
+        Traffic Sources:
+        - Organic Search: +67% YoY
+        - Direct: +12% YoY
+        - Social: +23% YoY
+        - Paid: -5% YoY
+        """,
         expert_analysis="""
         Key Findings:
         1. Mobile traffic grew 45% while desktop declined 12%
         2. Conversion rate on mobile (1.2%) significantly lower than desktop (3.8%)
         3. Bounce rate spike in July correlated with site redesign
         4. Organic search traffic up 67% following SEO improvements
-        
+
         Recommendations:
         - Prioritize mobile conversion optimization
         - Review July redesign for usability issues
@@ -482,6 +528,7 @@ def example_workflow():
         ai_analysis=ai_result['analysis'],
         expert_corrections=expert_corrections,
         dataset_summary=new_dataset_summary,
+        dataset_details=new_dataset_details,
         tags=["revenue", "regional_analysis"],
         expert_id="analyst_jane"
     )

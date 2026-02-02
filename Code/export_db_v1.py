@@ -181,15 +181,20 @@ Examples:
     if args.output_dir != "." and not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
+    # Get base name from database path (remove _db suffix if present)
+    db_base_name = os.path.basename(db_path)
+    if db_base_name.endswith("_db"):
+        db_base_name = db_base_name[:-3]  # Remove "_db" suffix
+
     # Export each table
     for table_name in tables:
         if args.csv:
-            output_file = os.path.join(args.output_dir, f"{table_name}.csv")
+            output_file = os.path.join(args.output_dir, f"{db_base_name}.csv")
             count = export_to_csv(db_path, table_name, output_file)
             print(f"[OK] Exported {count} records to {output_file}")
 
         if args.json:
-            output_file = os.path.join(args.output_dir, f"{table_name}.json")
+            output_file = os.path.join(args.output_dir, f"{db_base_name}.json")
             count = export_to_json(db_path, table_name, output_file)
             print(f"[OK] Exported {count} records to {output_file}")
 

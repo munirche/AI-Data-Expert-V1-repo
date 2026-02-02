@@ -81,15 +81,15 @@ Tables: 1
 ```bash
 python Code/export_db_v1.py --csv
 ```
-Creates: `expert_annotations.csv`
+Creates: `expert_learning_system_v1.csv` (named after the database)
 
 ### Export to Specific Directory
 ```bash
 python Code/export_db_v1.py --csv --json --output-dir exports
 ```
 Creates:
-- `exports/expert_annotations.csv`
-- `exports/expert_annotations.json`
+- `exports/expert_learning_system_v1.csv`
+- `exports/expert_learning_system_v1.json`
 
 ---
 
@@ -103,6 +103,7 @@ All table columns except `vector` (the embedding data - just numbers, not useful
 | timestamp | When the annotation was created |
 | expert_id | Who created it |
 | dataset_summary | Brief description of the data |
+| dataset_details | The actual raw data (tables, numbers, etc.) |
 | expert_analysis | The expert's findings |
 | patterns | JSON string of detected patterns |
 | tags | Comma-separated category tags |
@@ -127,7 +128,7 @@ python Code/export_db_v1.py --db expert_learning_system_v1_db --csv
 
 ## Output Files
 
-Exported files are named after the table:
-- Table `expert_annotations` → `expert_annotations.csv` / `expert_annotations.json`
+Exported files are named after the database (without the `_db` suffix):
+- Database `expert_learning_system_v1_db` → `expert_learning_system_v1.csv` / `expert_learning_system_v1.json`
 
 Files are saved to current directory by default, or use `--output-dir` to specify location.
