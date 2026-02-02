@@ -13,8 +13,18 @@ This implementation shows:
 import json
 import os
 import uuid
+import warnings
 from datetime import datetime
 from typing import List, Dict, Any
+
+# Suppress deprecation warning from google.generativeai (used by LanceDB embeddings)
+warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
+
+# Set GOOGLE_API_KEY from GEMINI_API_KEY if not already set
+# LanceDB embeddings look for GOOGLE_API_KEY, but we use GEMINI_API_KEY
+if os.environ.get('GOOGLE_API_KEY') is None and os.environ.get('GEMINI_API_KEY'):
+    os.environ['GOOGLE_API_KEY'] = os.environ.get('GEMINI_API_KEY')
+
 import lancedb
 from lancedb.pydantic import LanceModel, Vector
 from lancedb.embeddings import get_registry
