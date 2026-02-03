@@ -26,5 +26,105 @@ Starting from the question “let’s talk about the embeddings. i understand it
 ## Summary of Planned Improvements
 1. Ask Gemini for structured patterns to reduce manual transcription and better feed downstream analytics.
 2. Store structured `dataset_summary` metadata (JSON) alongside the textual summary for richer filtering and prompting.
-3. Research and possibly adopt local embeddings so the vector store stops depending on Gemini’s embedding API.
+3. Research and possibly adopt local embeddings so the vector store stops depending on Gemini's embedding API.
 4. Refactor the script to work dynamically on the persistent database instead of running the same simulated demo on each execution.
+
+---
+
+## 02/02/2026 — Discussion with Claude Opus 4.5
+
+This session focused on planning V2 of the expert learning system. Decision: keep V1 as-is (a working demo/reference) and build V2 as the functional tool.
+
+### V1 Status
+- V1 remains a demonstration script showing the RAG workflow
+- Useful for learning and reference
+- Not intended for production use
+
+### V2 Planning: CLI-First Approach
+
+**Sequencing decision:** Build the CLI first with hardcoded values, then extract configuration later.
+
+Rationale:
+- Get something functional faster
+- No multiple use cases yet (config extraction solves a future problem)
+- Building the CLI reveals what actually needs to be configurable
+- Easier to extract config from working code than to design speculatively
+
+**Proposed CLI commands:**
+```
+python cli.py add        # Add new annotation
+python cli.py analyze    # Analyze new dataset with AI
+python cli.py list       # Show all annotations
+python cli.py search     # Find similar past analyses
+```
+
+### V2 Planning: Configuration System (Later)
+
+After CLI works, extract settings to config files per use case:
+- Database path and name
+- Pattern vocabulary (anomaly, trend, seasonality, etc.)
+- Tag vocabulary
+- AI prompt templates
+- Output format expectations
+
+Structure:
+```
+projects/
+├── revenue_analysis/
+│   ├── config.json
+│   └── database/
+├── support_tickets/
+│   ├── config.json
+│   └── database/
+```
+
+### V2 Planning: Simplified Example Data
+
+Current V1 has three diverse annotations (revenue, churn, website traffic). For V2 development, simplify to a single domain: **revenue analysis only**.
+
+Benefits:
+- Retrieval finds genuinely similar cases (better signal)
+- Consistent pattern vocabulary
+- Easier to debug and reason about
+- Clear test: Q1 2024 data should match Q1-Q4 2023 data
+
+Proposed revenue-only annotations:
+| # | Dataset | Key Finding |
+|---|---------|-------------|
+| 1 | Q1-Q4 2023 by region | Q3 anomaly, West strong, seasonal |
+| 2 | Q1-Q4 2022 by region | Steady growth, East underperformed |
+| 3 | Q1-Q4 2023 by product | Product A declining, C growing |
+
+### V2 Planning: Simulated Expert Corpus (~50 cases)
+
+Idea: Create a larger dataset of simulated expert annotations to:
+1. Serve as ground truth / reference
+2. Gradually feed cases to the AI
+3. Measure how AI improves as database grows
+4. Test if AI can replicate expert analysis style
+
+**Scenario types for variety:**
+| Type | Count | Description |
+|------|-------|-------------|
+| Normal/stable | 10 | No major issues |
+| Single anomaly | 10 | One quarter/region off |
+| Seasonal pattern | 8 | Predictable peaks |
+| Growth trend | 6 | Upward movement |
+| Decline trend | 6 | Downward movement |
+| Regional variance | 5 | One region different |
+| Complex/multi-pattern | 5 | Multiple signals |
+
+**Generation approach:** Template + variation with manual review.
+
+**Metrics to track:**
+- Pattern detection rate (did AI find same patterns?)
+- Recommendation quality
+- Style matching
+- Improvement curve as DB grows
+
+### Next Steps for V2
+1. Design the 50-case simulated corpus structure
+2. Build CLI with basic commands (add, analyze, list)
+3. Test with revenue-only data
+4. Add configuration extraction when needed
+5. Expand to other domains once revenue works well
