@@ -355,7 +355,8 @@ class ExpertLearningEngine:
     def reset_database(self) -> bool:
         """Clear all annotations from the database."""
         try:
-            self.db.drop_table(self.table_name)
+            if self.table_name in self.db.table_names():
+                self.db.drop_table(self.table_name)
             self.table = None
             return True
         except Exception:
