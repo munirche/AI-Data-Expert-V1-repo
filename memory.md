@@ -20,6 +20,20 @@ A human-in-the-loop AI system that learns from expert annotations to eventually 
 |---------|-----------------|---------|
 | google-genai | `pip install google-genai` | LLM API calls (Gemini) |
 | lancedb | `pip install lancedb` | Vector database for RAG |
+| Docker Desktop | [docker.com](https://www.docker.com/products/docker-desktop/) | Container runtime for tools |
+
+### Lance Data Viewer
+
+A Docker-based tool for inspecting LanceDB tables visually in the browser.
+
+**To run:**
+```powershell
+docker run --rm -p 8080:8080 -v "C:/Users/munir/Projects/AI Data Expert V1/expert_learning_system_v1_db:/data:ro" ghcr.io/gordonmurray/lance-data-viewer:lancedb-0.24.3
+```
+
+**Then open:** http://localhost:8080
+
+**To stop:** Press `Ctrl+C` in PowerShell
 
 ## Environment Variables
 
@@ -102,10 +116,13 @@ AI Data Expert V1/
 │   ├── expert_learning_system_guide.md              # Research guide by Claude
 │   ├── concepts.md                                  # Key concepts reference
 │   ├── how_it_works_expert_learning_system_v1.md    # V1 explanation + what code does
-│   └── how_it_works_export_db_v1.md                 # Export utility documentation
+│   ├── how_it_works_export_db_v1.md                 # Export utility documentation
+│   ├── how_it_works_launch_lance_viewer.md          # Lance viewer documentation
+│   └── Discussion_expert_learning_system_v1.md      # Design notes and improvements
 ├── Code/
 │   ├── expert_learning_system_v1.py                 # RAG implementation using Gemini + LanceDB
-│   └── export_db_v1.py                              # Database export utility (CSV/JSON)
+│   ├── export_db_v1.py                              # Database export utility (CSV/JSON)
+│   └── launch_lance_viewer.py                       # Opens Lance Data Viewer in browser
 ├── expert_learning_system_v1_db/                    # LanceDB database (local, not in git)
 ├── memory.md
 ├── requirements.txt                                 # Python dependencies
