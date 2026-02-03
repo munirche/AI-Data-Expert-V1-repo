@@ -4,7 +4,7 @@ A utility script to open the Lance Data Viewer in your browser for inspecting La
 
 **Related files:**
 - Script: `Code/launch_lance_viewer.py`
-- Database: `expert_learning_system_v1_db/`
+- Databases: `expert_learning_system_v1_db/`, `expert_learning_system_v2_db/`
 
 ---
 
@@ -22,7 +22,10 @@ Lance Data Viewer is a web-based tool that lets you:
 ## Quick Start
 
 ```powershell
-python Code/launch_lance_viewer.py
+python Code/launch_lance_viewer.py           # View all databases
+python Code/launch_lance_viewer.py v2        # View V2 database only
+python Code/launch_lance_viewer.py v1        # View V1 database only
+python Code/launch_lance_viewer.py --list    # List available databases
 ```
 
 Then open http://localhost:8080 in your browser.
@@ -40,10 +43,23 @@ Press `Ctrl+C` in PowerShell to stop.
 
 ## What the Script Does
 
-1. **Builds the Docker command** with the correct paths and settings
-2. **Runs the container** which starts a web server on port 8080
-3. **Mounts your database folder** as read-only (`:ro`) so the viewer can read but not modify your data
-4. **Waits for Ctrl+C** to stop the container
+1. **Stops any existing viewer** containers (clears port 8080)
+2. **Finds all .lance tables** in the configured databases
+3. **Mounts tables** with unique names (e.g., `v1_expert_annotations.lance`)
+4. **Runs the container** which starts a web server on port 8080
+5. **Waits for Ctrl+C** to stop the container
+
+---
+
+## Command Options
+
+| Command | Purpose |
+|---------|---------|
+| `python Code/launch_lance_viewer.py` | View all databases (default) |
+| `python Code/launch_lance_viewer.py all` | View all databases |
+| `python Code/launch_lance_viewer.py v1` | View V1 database only |
+| `python Code/launch_lance_viewer.py v2` | View V2 database only |
+| `python Code/launch_lance_viewer.py --list` | List available databases and tables |
 
 ---
 
@@ -53,27 +69,24 @@ The script has these settings at the top:
 
 | Variable | Value | Purpose |
 |----------|-------|---------|
-| `DB_PATH` | `expert_learning_system_v1_db` | Which database to view |
+| `PROJECT_PATH` | `AI Data Expert V1` | Project folder path |
+| `DATABASES` | `v1`, `v2` | Available database mappings |
 | `IMAGE` | `lancedb-0.24.3` | Docker image version |
 | `PORT` | `8080` | Local port for the web interface |
-
-To view a different database, edit `DB_PATH` in the script.
+| `CONTAINER_NAME` | `lance-viewer` | Docker container name |
 
 ---
 
-## The Docker Command
+## How Multiple Databases Work
 
-The script runs this command:
+When viewing all databases, the script:
+1. Finds all `.lance` folders in each database
+2. Mounts each with a unique name: `v1_tablename.lance`, `v2_tablename.lance`
+3. All tables appear in the viewer's table list
 
-```powershell
-docker run --rm -p 8080:8080 -v "C:/Users/munir/Projects/AI Data Expert V1/expert_learning_system_v1_db:/data:ro" ghcr.io/gordonmurray/lance-data-viewer:lancedb-0.24.3
-```
-
-| Flag | Meaning |
-|------|---------|
-| `--rm` | Remove container when stopped (clean up) |
-| `-p 8080:8080` | Map port 8080 on your PC to the container |
-| `-v ...:/data:ro` | Mount database folder as `/data` inside container, read-only |
+Example table names in viewer:
+- `v1_expert_annotations.lance` (from V1)
+- `v2_expert_annotations.lance` (from V2)
 
 ---
 
@@ -82,8 +95,8 @@ docker run --rm -p 8080:8080 -v "C:/Users/munir/Projects/AI Data Expert V1/exper
 | Problem | Solution |
 |---------|----------|
 | "Docker not found" | Start Docker Desktop first |
-| Port 8080 in use | Stop other services using that port, or edit `PORT` in script |
-| No tables shown | Check that the database path exists and contains `.lance` files |
+| Port 8080 in use | Script auto-clears the port; if it fails, run `docker ps` and stop manually |
+| No tables shown | Check that database folders exist and contain `.lance` files |
 | Container won't start | Run `docker pull ghcr.io/gordonmurray/lance-data-viewer:lancedb-0.24.3` manually |
 
 ---
