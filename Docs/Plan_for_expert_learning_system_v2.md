@@ -315,32 +315,32 @@ For development and testing, the first use case is patient bloodwork analysis.
 
 ## Implementation Phases
 
-### Phase 1: Core CLI
-- [ ] Set up project structure
-- [ ] Create config.json for use case
-- [ ] Implement engine with generic schema
-- [ ] Implement commands: load, list, stats, reset
-- [ ] Create initial corpus (10-20 cases)
-- [ ] Test basic workflow
+### Phase 1: Core CLI (Completed 02/02/2026)
+- [x] Set up project structure
+- [x] Create config.json for use case
+- [x] Implement engine with generic schema
+- [x] Implement commands: load, list, stats, reset
+- [x] Create initial corpus (15 cases)
+- [x] Test basic workflow
 
-### Phase 2: AI Analysis
-- [ ] Implement analyze command
-- [ ] Implement search command
-- [ ] Add compare mode
-- [ ] Add batch mode
+### Phase 2: AI Analysis (In Progress)
+- [x] Implement analyze command
+- [x] Implement search command
+- [x] Add compare mode
+- [x] Add batch mode
 - [ ] Expand corpus to 50 cases
 - [ ] Measure baseline accuracy
 
 ### Phase 3: Refinement
 - [ ] Add validation against config vocabulary
 - [ ] Improve prompts based on results
-- [ ] Add add command (manual entry)
+- [x] Add add command (manual entry)
 - [ ] Performance tuning
 
 ### Phase 4: Production Readiness
 - [ ] Error handling
 - [ ] Logging
-- [ ] Documentation
+- [x] Documentation (CLI, lance viewer)
 - [ ] Real data testing
 
 ---

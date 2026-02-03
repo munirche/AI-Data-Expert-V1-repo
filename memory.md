@@ -118,12 +118,20 @@ AI Data Expert V1/
 │   ├── how_it_works_expert_learning_system_v1.md    # V1 explanation + what code does
 │   ├── how_it_works_export_db_v1.md                 # Export utility documentation
 │   ├── how_it_works_launch_lance_viewer.md          # Lance viewer documentation
-│   └── Discussion_expert_learning_system_v1.md      # Design notes and improvements
+│   ├── how_it_works_cli_v2.md                       # V2 CLI documentation
+│   ├── Discussion_expert_learning_system_v1.md      # Design notes and improvements
+│   └── Plan_for_expert_learning_system_v2.md        # V2 implementation plan
 ├── Code/
-│   ├── expert_learning_system_v1.py                 # RAG implementation using Gemini + LanceDB
+│   ├── expert_learning_system_v1.py                 # V1 RAG demo (reference)
+│   ├── expert_learning_system_v2.py                 # V2 generic RAG engine
+│   ├── cli_v2.py                                    # V2 CLI interface
 │   ├── export_db_v1.py                              # Database export utility (CSV/JSON)
 │   └── launch_lance_viewer.py                       # Opens Lance Data Viewer in browser
-├── expert_learning_system_v1_db/                    # LanceDB database (local, not in git)
+├── corpus/
+│   └── corpus.csv                                   # Ground truth test cases (15 cases)
+├── config.json                                      # Use case configuration
+├── expert_learning_system_v1_db/                    # V1 LanceDB database (not in git)
+├── expert_learning_system_v2_db/                    # V2 LanceDB database (not in git)
 ├── memory.md
 ├── requirements.txt                                 # Python dependencies
 └── .gitignore
@@ -148,8 +156,9 @@ This allows multiple versions to coexist during development.
 | 02/02/2026 | 2     | Analyzing and planning V2, Lance Data Viewer setup |
 | 02/02/2026 | 1.5   | V2 plan document, CLI commands, use case design |
 | 02/02/2026 | 0.2   | Phase 1 implementation: engine, CLI, corpus |
+| 02/02/2026 | 0.8   | Phase 2 testing, analyze command, documentation |
 
-**Total: 11.2 hours**
+**Total: 12 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.
@@ -159,5 +168,14 @@ This allows multiple versions to coexist during development.
   - Fixed API key compatibility (GEMINI_API_KEY → GOOGLE_API_KEY)
   - Added `dataset_details` field to store raw data with annotations
   - Replaced deprecated `google-generativeai` with custom embedding using `google-genai`
+- **02/02/2026:**
+  - Installed Docker and Lance Data Viewer for database inspection
+  - Planned and designed V2: separation of engine from use case, CLI-first approach
+  - Implemented V2 Phase 1: generic engine, CLI with load/list/stats/reset/search/add/analyze
+  - Created config.json for patient bloodwork use case
+  - Created corpus with 15 test cases
+  - Enhanced lance viewer to support multiple databases
+  - Phase 2 mostly complete: analyze command with compare and batch modes working
+  - Remaining: expand corpus to 50 cases, measure baseline accuracy
   - Added `requirements.txt` for dependency management
 
