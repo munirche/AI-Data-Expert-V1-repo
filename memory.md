@@ -147,8 +147,9 @@ This allows multiple versions to coexist during development.
 | 02/01/2026 | 1     | Discussion on possible improvements |
 | 02/02/2026 | 2     | Analyzing and planning V2, Lance Data Viewer setup |
 | 02/02/2026 | 1.5   | V2 plan document, CLI commands, use case design |
+| 02/02/2026 | 0.2   | Phase 1 implementation: engine, CLI, corpus |
 
-**Total: 11 hours**
+**Total: 11.2 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.

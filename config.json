@@ -1,0 +1,56 @@
+{
+  "use_case_name": "Patient Bloodwork Analysis",
+  "database_path": "./expert_learning_system_v2_db",
+  "corpus_path": "./corpus/corpus.csv",
+
+  "record_id_field": "record_id",
+  "data_fields": [
+    "age",
+    "sex",
+    "medical_history",
+    "glucose",
+    "bun",
+    "creatinine",
+    "sodium",
+    "potassium",
+    "hemoglobin",
+    "wbc"
+  ],
+
+  "annotation_fields": {
+    "summary": "required",
+    "analysis": "required",
+    "risk_assessment": "optional",
+    "patterns": "optional",
+    "recommended_actions": "optional",
+    "additional_tests": "optional",
+    "tags": "optional"
+  },
+
+  "pattern_vocabulary": [
+    "abnormal_value",
+    "correlation",
+    "risk_indicator",
+    "trend",
+    "normal"
+  ],
+
+  "risk_levels": [
+    "low",
+    "moderate",
+    "high",
+    "critical"
+  ],
+
+  "reference_ranges": {
+    "glucose": {"min": 70, "max": 100, "unit": "mg/dL"},
+    "bun": {"min": 7, "max": 20, "unit": "mg/dL"},
+    "creatinine": {"min": 0.7, "max": 1.3, "unit": "mg/dL"},
+    "sodium": {"min": 136, "max": 145, "unit": "mEq/L"},
+    "potassium": {"min": 3.5, "max": 5.0, "unit": "mEq/L"},
+    "hemoglobin": {"min": 12.0, "max": 17.5, "unit": "g/dL"},
+    "wbc": {"min": 4.5, "max": 11.0, "unit": "K/uL"}
+  },
+
+  "ai_prompt_template": "You are an expert clinical analyst reviewing patient lab results.\n\nBased on these similar past analyses by experts:\n{examples}\n\nNow analyze this new patient record:\n{record}\n\nProvide:\n1. Summary of findings\n2. Risk assessment (low/moderate/high/critical)\n3. Key patterns detected\n4. Recommended actions\n5. Additional tests needed (if any)"
+}

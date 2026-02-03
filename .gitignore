@@ -3,5 +3,9 @@ __pycache__/
 *.pyc
 lancedb/
 *_db/
+
+# Ignore CSV/JSON except project files
 *.csv
 *.json
+!config.json
+!corpus/*.csv
