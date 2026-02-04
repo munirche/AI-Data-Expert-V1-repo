@@ -159,8 +159,9 @@ This allows multiple versions to coexist during development.
 | 02/02/2026 | 0.2   | Phase 1 implementation: engine, CLI, corpus |
 | 02/02/2026 | 0.8   | Phase 2 testing, analyze command, documentation |
 | 02/03/2026 | 3     | Delete command, structured AI output, --explain mode, corpus expansion, docstrings, V2 documentation |
+| 02/03/2026 | 0.4   | Embeddings investigation: models, dimensions, PubMedBERT |
 
-**Total: 15 hours**
+**Total: 15.4 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.
@@ -206,4 +207,10 @@ This allows multiple versions to coexist during development.
    │   ├── config.json
    │   └── database/
    ```
+
+5. **Domain-specific embeddings:** Evaluate PubMedBERT or ClinicalBERT for medical use case:
+   - Better understanding of clinical terminology
+   - Runs locally (no API costs, data stays private)
+   - May improve retrieval quality for similar clinical patterns
+   - Consider when scaling beyond 50 cases or seeing retrieval issues
 

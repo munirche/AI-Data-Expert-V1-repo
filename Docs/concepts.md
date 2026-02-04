@@ -11,6 +11,7 @@ A reference for key concepts encountered during research and development.
    - [Augment Phase](#augment-phase)
    - [Generate Phase](#generate-phase)
 2. [LLM Calls via API: Possible Approaches](#llm-calls-via-api-possible-approaches)
+3. [Realistic Limits of Current RAG Implementation](#realistic-limits-of-current-rag-implementation)
 
 ---
 
@@ -143,6 +144,89 @@ Text gets converted into a list of numbers (typically 768-1536 numbers):
 - Similar content = similar embeddings = small distance between them
 - Vector databases are optimized to search millions of embeddings quickly
 - You don't create embeddings manually - the embedding model does it for you
+
+### Embedding Model Options
+
+Different providers offer embedding models with varying quality, dimensions, and cost:
+
+| Provider | Model | Dimensions | Notes |
+|----------|-------|------------|-------|
+| **Google** | text-embedding-004 | 768 | Current choice, free tier |
+| **OpenAI** | text-embedding-3-small | 1536 | Good balance |
+| **OpenAI** | text-embedding-3-large | 3072 | Highest quality, most expensive |
+| **Cohere** | embed-english-v3 | 1024 | Good for search |
+| **Voyage AI** | voyage-large-2 | 1536 | High quality, Anthropic recommends |
+| **Local** | sentence-transformers | 384-1024 | Free, runs on your machine |
+| **Local** | Ollama (nomic-embed) | 768 | Easy local setup |
+
+**Note:** Anthropic/Claude does not offer an embedding API. Claude is only a chat/completion model. If using Claude for generation, pair it with a separate embedding provider (Anthropic recommends Voyage AI).
+
+### Dimensionality Trade-offs
+
+| Dimensions | Pros | Cons |
+|------------|------|------|
+| **384-512** | Fast, small storage | May miss nuance |
+| **768** (current) | Good balance | Standard choice |
+| **1536-3072** | Captures more detail | Slower search, more storage, higher cost |
+
+Dimensionality is fixed per model - you choose it by selecting a model. Higher dimensions capture more semantic nuance, but with diminishing returns. 768 is sufficient for most use cases.
+
+### Ways to Improve Embedding Quality
+
+**Better text preparation** - Add context to raw values:
+- Weak: "92"
+- Better: "glucose: 92 mg/dL (normal range: 70-100)"
+
+**Domain-specific models** - Models trained for specific fields:
+- PubMedBERT (medical/clinical)
+- FinBERT (financial)
+- LegalBERT (legal)
+
+**Hybrid search** - Combine embeddings with keyword matching to catch exact terms that embeddings might miss.
+
+### Cost Considerations
+
+| Model | Cost per 1M tokens |
+|-------|-------------------|
+| Gemini text-embedding-004 | Free (within limits) |
+| OpenAI text-embedding-3-small | ~$0.02 |
+| OpenAI text-embedding-3-large | ~$0.13 |
+| Local (sentence-transformers) | Free (your compute) |
+
+### Domain-Specific Embeddings: PubMedBERT
+
+For specialized domains, models trained on domain-specific text can outperform general-purpose embeddings.
+
+**PubMedBERT** (Microsoft Research) is trained on 14M+ PubMed abstracts and clinical text. It understands medical terminology natively.
+
+| Aspect | General Models | PubMedBERT |
+|--------|----------------|------------|
+| Training data | Web, books, Wikipedia | PubMed abstracts, clinical notes |
+| Medical vocabulary | Learned incidentally | Built into the model |
+| "Creatinine" | Knows it's a word | Knows it's a kidney biomarker |
+| "WBC" | May confuse acronyms | Understands it's white blood cell count |
+
+**Available variants:**
+
+| Model | Trained On | Best For |
+|-------|------------|----------|
+| PubMedBERT-abstract | PubMed abstracts | Research/literature |
+| PubMedBERT-fulltext | Full articles | Detailed clinical text |
+| ClinicalBERT | MIMIC clinical notes | Real patient records |
+| BioBERT | PubMed + PMC | General biomedical |
+
+**How to use:** Available via Hugging Face (`microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract`). Requires `sentence-transformers` library. Runs locally - no API costs, data stays private.
+
+**Trade-offs:**
+
+| Pros | Cons |
+|------|------|
+| Better medical understanding | Requires local setup |
+| Free (no API costs) | Slower than cloud APIs |
+| Data stays private | 768 dimensions only |
+| Native clinical vocabulary | May underperform on non-medical text |
+
+**When to consider switching:** When scaling beyond initial corpus, seeing retrieval quality issues, working with heavy medical jargon, or needing to keep patient data fully local.
 
 ---
 
@@ -363,5 +447,72 @@ The code structure stays similar across providers. Main changes:
 - Model name in API call
 
 This makes it relatively easy to start with one provider and switch later.
+
+---
+
+## Realistic Limits of Current RAG Implementation
+
+Understanding where this approach works well and where it struggles helps set appropriate expectations.
+
+### What Works Well
+
+| Data Characteristic | Why It Works |
+|---------------------|--------------|
+| **Tabular/structured data** | Clear fields, easy to embed and compare |
+| **10-50 input fields** | Fits in context, embeddings capture meaning |
+| **Single record per analysis** | Clear scope, focused patterns |
+| **Explicit patterns** | "If glucose > 200, then high risk" - learnable |
+| **Consistent expert logic** | AI can mimic reproducible reasoning |
+
+### Where It Struggles
+
+| Data Characteristic | Why It's Hard |
+|---------------------|---------------|
+| **Very large records** | Context window limits (~128K tokens for Gemini) |
+| **Time-series / sequences** | Embeddings lose temporal relationships |
+| **Images / mixed media** | Text embeddings don't capture visual data |
+| **Multi-table relationships** | Joins and dependencies hard to represent in flat text |
+| **Tacit expert knowledge** | "I just know from experience" can't be documented |
+| **Rare edge cases** | Need many examples to cover unusual patterns |
+
+### Practical Boundaries
+
+**Record size:** Works well up to ~2-3 pages of text per record. Beyond that, important details get lost in the embedding.
+
+**Field count:** 10-50 fields is comfortable. Hundreds of fields dilute the signal.
+
+**Pattern complexity:**
+- Single-factor patterns: Easy (elevated glucose = diabetes risk)
+- Two-factor correlations: Good (BUN + creatinine = kidney)
+- Three+ factor interactions: Harder, needs more examples
+- Temporal patterns: Difficult (trending over time)
+
+**Corpus size needed:**
+- Simple domain: 50-100 examples
+- Moderate complexity: 200-500 examples
+- Complex with many edge cases: 500+ examples
+
+### Patient Bloodwork Use Case Assessment
+
+The current use case (patient bloodwork) is a **good fit** because:
+- 10 numeric fields + 2 categorical fields
+- Clear reference ranges
+- Established clinical patterns
+- Expert reasoning is mostly explicit
+- Single-visit snapshot (no time component)
+
+### When to Consider Other Approaches
+
+| Situation | Better Alternative |
+|-----------|-------------------|
+| Need temporal analysis | Time-series models, LSTM |
+| Image interpretation | Vision models, multimodal LLMs |
+| Complex multi-table data | Graph databases, structured queries |
+| Real-time decisions | Fine-tuned smaller models |
+| Highly regulated (audit trail) | Rule-based systems with RAG augmentation |
+
+### Key Takeaway
+
+RAG with embeddings is excellent for **structured data with explicit patterns** where expert reasoning can be documented. It's not ideal for **temporal, visual, or deeply interconnected data** where relationships span beyond what text embeddings can capture.
 
 ---
