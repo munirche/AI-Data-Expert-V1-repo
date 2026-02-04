@@ -116,6 +116,7 @@ AI Data Expert V1/
 │   ├── expert_learning_system_guide.md              # Research guide by Claude
 │   ├── concepts.md                                  # Key concepts reference
 │   ├── how_it_works_expert_learning_system_v1.md    # V1 explanation + what code does
+│   ├── how_it_works_expert_learning_system_v2.md    # V2 concepts and workflow
 │   ├── how_it_works_export_db_v1.md                 # Export utility documentation
 │   ├── how_it_works_launch_lance_viewer.md          # Lance viewer documentation
 │   ├── how_it_works_cli_v2.md                       # V2 CLI documentation
@@ -157,8 +158,9 @@ This allows multiple versions to coexist during development.
 | 02/02/2026 | 1.5   | V2 plan document, CLI commands, use case design |
 | 02/02/2026 | 0.2   | Phase 1 implementation: engine, CLI, corpus |
 | 02/02/2026 | 0.8   | Phase 2 testing, analyze command, documentation |
+| 02/03/2026 | 3     | Delete command, structured AI output, --explain mode, corpus expansion, docstrings, V2 documentation |
 
-**Total: 12 hours**
+**Total: 15 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.
