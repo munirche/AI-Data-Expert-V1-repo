@@ -183,12 +183,14 @@ cli_v2.py analyze --record 11-20 --batch # Batch with metrics only
 **Interactive workflow:**
 1. Load record
 2. Retrieve similar past annotations
-3. AI generates analysis
-4. Display AI output
+3. AI generates structured JSON analysis
+4. Display each field: summary, risk, analysis, patterns, actions, tests
 5. Expert chooses: Accept / Edit / Reject / Skip
-6. Save to database
+6. Save all structured fields to database
 
-**Edit approach:** Save to temp file, user edits externally, press Enter to continue.
+**AI output format:** JSON with summary, analysis, risk_assessment, patterns (array), recommended_actions (array), additional_tests (array).
+
+**Edit approach:** Save to temp JSON file with all fields, user edits externally, press Enter to continue.
 
 **Compare mode:** Shows ground truth from corpus alongside AI output.
 
@@ -240,6 +242,17 @@ cli_v2.py reset --reload 10 --confirm  # Reset and load 10 from corpus
 ```
 
 Requires `--confirm` flag. Prompts for typed confirmation.
+
+### delete
+
+Delete specific annotation(s) from database.
+
+```
+cli_v2.py delete --id <annotation_id>     # Delete by annotation ID
+cli_v2.py delete --record <record_id>     # Delete all annotations for a record
+```
+
+Shows what will be deleted and prompts for confirmation.
 
 ---
 
@@ -328,6 +341,8 @@ For development and testing, the first use case is patient bloodwork analysis.
 - [x] Implement search command
 - [x] Add compare mode
 - [x] Add batch mode
+- [x] Add delete command
+- [x] Structured AI output (JSON with all fields: summary, analysis, risk, patterns, actions, tests)
 - [ ] Expand corpus to 50 cases
 - [ ] Measure baseline accuracy
 

@@ -52,5 +52,5 @@
     "wbc": {"min": 4.5, "max": 11.0, "unit": "K/uL"}
   },
 
-  "ai_prompt_template": "You are an expert clinical analyst reviewing patient lab results.\n\nBased on these similar past analyses by experts:\n{examples}\n\nNow analyze this new patient record:\n{record}\n\nProvide:\n1. Summary of findings\n2. Risk assessment (low/moderate/high/critical)\n3. Key patterns detected\n4. Recommended actions\n5. Additional tests needed (if any)"
+  "ai_prompt_template": "You are an expert clinical analyst reviewing patient lab results.\n\nBased on these similar past analyses by experts:\n{examples}\n\nNow analyze this new patient record:\n{record}\n\nRespond with ONLY a JSON object in this exact format (no markdown, no extra text):\n{{\n  \"summary\": \"Brief 1-2 sentence summary of key findings\",\n  \"analysis\": \"Detailed analysis paragraph explaining the clinical significance\",\n  \"risk_assessment\": \"low|moderate|high|critical\",\n  \"patterns\": [\n    {{\"type\": \"pattern_type\", \"field\": \"field_name\", \"description\": \"what was found\"}}\n  ],\n  \"recommended_actions\": [\"action 1\", \"action 2\"],\n  \"additional_tests\": [\"test 1\", \"test 2\"]\n}}\n\nPattern types: abnormal_value, correlation, risk_indicator, trend, normal\nRisk levels: low, moderate, high, critical"
 }

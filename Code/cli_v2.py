@@ -1,7 +1,7 @@
 """
 Expert Learning System V2 - Command Line Interface
 
-Commands: load, list, stats, reset, search, add, analyze
+Commands: load, list, stats, reset, search, add, analyze, delete
 """
 
 import argparse
@@ -192,6 +192,54 @@ def cmd_add(engine: ExpertLearningEngine, args):
     print(f"[OK] Annotation saved with ID: {ann_id}")
 
 
+def cmd_delete(engine: ExpertLearningEngine, args):
+    """Delete annotation(s) from database."""
+
+    if not args.id and not args.record:
+        print("Usage: cli_v2.py delete --id <annotation_id>  or  --record <record_id>")
+        return
+
+    if args.id:
+        # Show what will be deleted
+        ann = engine.get_annotation(args.id)
+        if not ann:
+            print(f"[ERROR] Annotation {args.id} not found.")
+            return
+
+        print(f"Annotation: {ann['annotation_id']}")
+        print(f"  Record: {ann['record_id']}")
+        print(f"  Summary: {ann['summary'][:60]}...")
+
+        confirm = input("Delete this annotation? (y/n): ").strip().lower()
+        if confirm != 'y':
+            print("Cancelled.")
+            return
+
+        count = engine.delete_annotation(annotation_id=args.id)
+        print(f"[OK] Deleted {count} annotation(s).")
+
+    elif args.record:
+        # Delete by record_id (may have multiple annotations)
+        annotations = engine.list_annotations()
+        matches = [a for a in annotations if a['record_id'] == str(args.record)]
+
+        if not matches:
+            print(f"[ERROR] No annotations found for record {args.record}.")
+            return
+
+        print(f"Found {len(matches)} annotation(s) for record {args.record}:")
+        for ann in matches:
+            print(f"  - {ann['annotation_id']}: {ann['summary'][:50]}...")
+
+        confirm = input(f"Delete all {len(matches)} annotation(s)? (y/n): ").strip().lower()
+        if confirm != 'y':
+            print("Cancelled.")
+            return
+
+        count = engine.delete_annotation(record_id=args.record)
+        print(f"[OK] Deleted {count} annotation(s).")
+
+
 def cmd_analyze(engine: ExpertLearningEngine, args):
     """Analyze a record using AI."""
 
@@ -244,7 +292,30 @@ def cmd_analyze(engine: ExpertLearningEngine, args):
     print("\n" + "=" * 70)
     print("AI ANALYSIS:")
     print("-" * 70)
-    print(result['analysis'])
+
+    if not result.get('parse_success', False):
+        print("[WARNING] AI did not return valid JSON. Showing raw response:")
+        print(result.get('raw_response', result.get('analysis', '')))
+    else:
+        print(f"\nSummary: {result['summary']}")
+        print(f"\nRisk Assessment: {result['risk_assessment']}")
+        print(f"\nAnalysis:\n{result['analysis']}")
+
+        if result['patterns']:
+            print(f"\nPatterns Detected:")
+            for p in result['patterns']:
+                print(f"  - [{p.get('type', 'unknown')}] {p.get('field', '')}: {p.get('description', '')}")
+
+        if result['recommended_actions']:
+            print(f"\nRecommended Actions:")
+            for a in result['recommended_actions']:
+                print(f"  - {a}")
+
+        if result['additional_tests']:
+            print(f"\nAdditional Tests:")
+            for t in result['additional_tests']:
+                print(f"  - {t}")
+
     print("=" * 70)
 
     # Compare mode
@@ -262,34 +333,48 @@ def cmd_analyze(engine: ExpertLearningEngine, args):
         choice = input("Choice: ").strip().upper()
 
         if choice == 'A':
-            # Save as-is
+            # Save with all structured fields
             ann_id = engine.store_annotation(
                 record_id=str(record_data.get(engine.config["record_id_field"], "unknown")),
                 record_data=record_data,
-                summary=f"AI analysis of record {record_data.get(engine.config['record_id_field'], 'unknown')}",
-                analysis=result['analysis'],
-                risk_assessment="",
+                summary=result.get('summary', ''),
+                analysis=result.get('analysis', ''),
+                risk_assessment=result.get('risk_assessment', ''),
+                patterns=result.get('patterns', []),
+                recommended_actions=result.get('recommended_actions', []),
+                additional_tests=result.get('additional_tests', []),
                 tags=["ai_generated"]
             )
             print(f"[OK] Saved annotation {ann_id}")
 
         elif choice == 'E':
-            # Save to temp file for editing
-            temp_file = "temp_analysis.txt"
+            # Save to temp JSON file for editing
+            temp_file = "temp_analysis.json"
+            edit_data = {
+                'summary': result.get('summary', ''),
+                'analysis': result.get('analysis', ''),
+                'risk_assessment': result.get('risk_assessment', ''),
+                'patterns': result.get('patterns', []),
+                'recommended_actions': result.get('recommended_actions', []),
+                'additional_tests': result.get('additional_tests', [])
+            }
             with open(temp_file, 'w') as f:
-                f.write(result['analysis'])
+                json.dump(edit_data, f, indent=2)
             print(f"\nEdit the file: {temp_file}")
             input("Press Enter when done editing...")
 
             with open(temp_file, 'r') as f:
-                edited_analysis = f.read()
+                edited = json.load(f)
 
             ann_id = engine.store_annotation(
                 record_id=str(record_data.get(engine.config["record_id_field"], "unknown")),
                 record_data=record_data,
-                summary=f"Expert-reviewed analysis of record {record_data.get(engine.config['record_id_field'], 'unknown')}",
-                analysis=edited_analysis,
-                risk_assessment="",
+                summary=edited.get('summary', ''),
+                analysis=edited.get('analysis', ''),
+                risk_assessment=edited.get('risk_assessment', ''),
+                patterns=edited.get('patterns', []),
+                recommended_actions=edited.get('recommended_actions', []),
+                additional_tests=edited.get('additional_tests', []),
                 tags=["expert_reviewed"]
             )
             print(f"[OK] Saved annotation {ann_id}")
@@ -297,22 +382,33 @@ def cmd_analyze(engine: ExpertLearningEngine, args):
 
         elif choice == 'R':
             print("Rejected. Write your own analysis:")
-            # Save to temp file for writing
-            temp_file = "temp_analysis.txt"
+            # Save empty template for writing
+            temp_file = "temp_analysis.json"
+            template = {
+                'summary': '',
+                'analysis': '',
+                'risk_assessment': 'low',
+                'patterns': [],
+                'recommended_actions': [],
+                'additional_tests': []
+            }
             with open(temp_file, 'w') as f:
-                f.write("# Write your analysis here\n")
+                json.dump(template, f, indent=2)
             print(f"\nEdit the file: {temp_file}")
             input("Press Enter when done...")
 
             with open(temp_file, 'r') as f:
-                new_analysis = f.read()
+                written = json.load(f)
 
             ann_id = engine.store_annotation(
                 record_id=str(record_data.get(engine.config["record_id_field"], "unknown")),
                 record_data=record_data,
-                summary=f"Expert analysis of record {record_data.get(engine.config['record_id_field'], 'unknown')}",
-                analysis=new_analysis,
-                risk_assessment="",
+                summary=written.get('summary', ''),
+                analysis=written.get('analysis', ''),
+                risk_assessment=written.get('risk_assessment', ''),
+                patterns=written.get('patterns', []),
+                recommended_actions=written.get('recommended_actions', []),
+                additional_tests=written.get('additional_tests', []),
                 tags=["expert_written"]
             )
             print(f"[OK] Saved annotation {ann_id}")
@@ -359,6 +455,11 @@ def main():
     add_parser = subparsers.add_parser('add', help='Add annotation from file')
     add_parser.add_argument('--file', type=str, help='Path to annotation JSON file')
 
+    # delete command
+    delete_parser = subparsers.add_parser('delete', help='Delete annotation(s)')
+    delete_parser.add_argument('--id', type=str, help='Annotation ID to delete')
+    delete_parser.add_argument('--record', type=str, help='Delete all annotations for record ID')
+
     # analyze command
     analyze_parser = subparsers.add_parser('analyze', help='Analyze a record with AI')
     analyze_parser.add_argument('--record', type=str, help='Record ID from corpus')
@@ -384,6 +485,7 @@ def main():
         'reset': cmd_reset,
         'search': cmd_search,
         'add': cmd_add,
+        'delete': cmd_delete,
         'analyze': cmd_analyze
     }
 

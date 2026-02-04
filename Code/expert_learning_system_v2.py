@@ -362,6 +362,28 @@ class ExpertLearningEngine:
         except Exception:
             return False
 
+    def delete_annotation(self, annotation_id: str = None, record_id: str = None) -> int:
+        """Delete annotation(s) by annotation_id or record_id. Returns count deleted."""
+        if self.table is None:
+            return 0
+
+        if annotation_id:
+            # Count before delete
+            df = self.table.to_pandas()
+            count = len(df[df['annotation_id'] == annotation_id])
+            if count > 0:
+                self.table.delete(f'annotation_id = "{annotation_id}"')
+            return count
+
+        if record_id:
+            df = self.table.to_pandas()
+            count = len(df[df['record_id'] == str(record_id)])
+            if count > 0:
+                self.table.delete(f'record_id = "{record_id}"')
+            return count
+
+        return 0
+
     # -------------------------------------------------------------------------
     # AI ANALYSIS
     # -------------------------------------------------------------------------
@@ -381,7 +403,7 @@ class ExpertLearningEngine:
         record_data: Dict[str, Any],
         similar_analyses: List[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Generate AI analysis for a record."""
+        """Generate AI analysis for a record. Returns structured data."""
 
         # Format examples
         examples_text = ""
@@ -409,8 +431,40 @@ class ExpertLearningEngine:
             contents=prompt
         )
 
-        return {
-            'analysis': response.text,
-            'similar_count': len(similar_analyses) if similar_analyses else 0,
-            'timestamp': datetime.now().isoformat()
-        }
+        # Parse JSON response
+        raw_text = response.text.strip()
+
+        # Remove markdown code blocks if present
+        if raw_text.startswith("```"):
+            lines = raw_text.split("\n")
+            # Remove first line (```json) and last line (```)
+            raw_text = "\n".join(lines[1:-1])
+
+        try:
+            parsed = json.loads(raw_text)
+            return {
+                'summary': parsed.get('summary', ''),
+                'analysis': parsed.get('analysis', ''),
+                'risk_assessment': parsed.get('risk_assessment', ''),
+                'patterns': parsed.get('patterns', []),
+                'recommended_actions': parsed.get('recommended_actions', []),
+                'additional_tests': parsed.get('additional_tests', []),
+                'similar_count': len(similar_analyses) if similar_analyses else 0,
+                'timestamp': datetime.now().isoformat(),
+                'raw_response': raw_text,
+                'parse_success': True
+            }
+        except json.JSONDecodeError:
+            # Fallback: return raw text if JSON parsing fails
+            return {
+                'summary': '',
+                'analysis': raw_text,
+                'risk_assessment': '',
+                'patterns': [],
+                'recommended_actions': [],
+                'additional_tests': [],
+                'similar_count': len(similar_analyses) if similar_analyses else 0,
+                'timestamp': datetime.now().isoformat(),
+                'raw_response': raw_text,
+                'parse_success': False
+            }
