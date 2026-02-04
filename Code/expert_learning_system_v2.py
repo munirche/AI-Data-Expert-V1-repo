@@ -148,7 +148,8 @@ class ExpertLearningEngine:
         patterns: List[Dict] = None,
         recommended_actions: List[str] = None,
         additional_tests: List[str] = None,
-        tags: List[str] = None
+        tags: List[str] = None,
+        explain: bool = False
     ) -> str:
         """Store an expert annotation in the database."""
 
@@ -156,6 +157,19 @@ class ExpertLearningEngine:
 
         # Prepare the text field for embedding (summary + analysis)
         text_for_embedding = f"{summary}\n\n{analysis}"
+
+        if explain:
+            print(f"\n[STEP] Preparing text for embedding...")
+            print(f"       Combining summary ({len(summary)} chars) + analysis ({len(analysis)} chars)")
+            print(f"\n       Text to embed:")
+            print("       " + "-" * 50)
+            for line in text_for_embedding.split('\n'):
+                print(f"       {line}")
+            print("       " + "-" * 50)
+
+        if explain:
+            print(f"\n[STEP] Requesting embedding from Gemini text-embedding-004...")
+            print(f"       Using API key: {os.environ.get('GEMINI_API_KEY', 'NOT SET')[:8]}...")
 
         record = Annotation(
             annotation_id=annotation_id,
@@ -174,13 +188,29 @@ class ExpertLearningEngine:
 
         # Create table on first insert
         if self.table is None:
+            if explain:
+                print(f"\n[STEP] Creating database table '{self.table_name}'...")
             self.table = self.db.create_table(self.table_name, schema=Annotation)
 
+        if explain:
+            print(f"\n[STEP] Embedding vector received (768 dimensions)")
+            print(f"\n[STEP] Saving annotation to LanceDB...")
+            print(f"       Database: {self.config['database_path']}")
+            print(f"       Annotation ID: {annotation_id}")
+
         self.table.add([record])
+
+        if explain:
+            print(f"\n[STEP] Annotation saved successfully!")
+
         return annotation_id
 
-    def load_from_corpus(self, record_id: str) -> Optional[str]:
+    def load_from_corpus(self, record_id: str, explain: bool = False) -> Optional[str]:
         """Load a record from corpus and store its annotation."""
+        if explain:
+            print(f"\n[STEP] Reading record {record_id} from corpus...")
+            print(f"       Corpus file: {self.config['corpus_path']}")
+
         record = self.get_corpus_record(record_id)
         if record is None:
             return None
@@ -191,6 +221,12 @@ class ExpertLearningEngine:
 
         record_data = {k: record[k] for k in data_fields if k in record}
         record_data[record_id_field] = record[record_id_field]
+
+        if explain:
+            print(f"\n[STEP] Extracting data fields from corpus record...")
+            print(f"       Fields: {', '.join(data_fields)}")
+            for k, v in record_data.items():
+                print(f"         {k}: {v}")
 
         # Parse patterns from JSON string if present
         patterns = []
@@ -214,6 +250,12 @@ class ExpertLearningEngine:
         if 'tags' in record and record['tags']:
             tags = [t.strip() for t in str(record['tags']).split(',')]
 
+        if explain:
+            print(f"\n[STEP] Extracting annotation fields...")
+            print(f"       Summary: \"{record.get('summary', '')[:60]}...\"")
+            print(f"       Risk: {record.get('risk_assessment', '')}")
+            print(f"       Tags: {tags}")
+
         return self.store_annotation(
             record_id=str(record[record_id_field]),
             record_data=record_data,
@@ -223,7 +265,8 @@ class ExpertLearningEngine:
             patterns=patterns,
             recommended_actions=actions,
             additional_tests=tests,
-            tags=tags
+            tags=tags,
+            explain=explain
         )
 
     def load_n_from_corpus(self, n: int) -> List[str]:
@@ -292,12 +335,22 @@ class ExpertLearningEngine:
             'tags': row['tags'].split(',') if row['tags'] else []
         }
 
-    def search_similar(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def search_similar(self, query: str, limit: int = 5, explain: bool = False) -> List[Dict[str, Any]]:
         """Search for similar annotations."""
         if self.table is None:
             return []
 
+        if explain:
+            print(f"\n[STEP] Requesting embedding for search query...")
+            print(f"       Model: text-embedding-004")
+            print(f"       Query: \"{query[:100]}...\"")
+
         results = self.table.search(query).limit(limit).to_list()
+
+        if explain:
+            print(f"\n[STEP] Embedding received, searching vector database...")
+            print(f"       Comparing against {len(self.table.to_pandas())} stored annotations")
+            print(f"       Returning top {limit} matches")
 
         similar = []
         for row in results:
@@ -310,6 +363,11 @@ class ExpertLearningEngine:
                 'similarity_score': 1 / (1 + row.get('_distance', 0)),
                 'tags': row['tags']
             })
+
+        if explain and similar:
+            print(f"\n[STEP] Similar annotations retrieved:")
+            for i, s in enumerate(similar, 1):
+                print(f"       #{i}: Record {s['record_id']} ({s['similarity_score']:.0%} similar)")
 
         return similar
 
@@ -388,22 +446,32 @@ class ExpertLearningEngine:
     # AI ANALYSIS
     # -------------------------------------------------------------------------
 
-    def retrieve_similar(self, record_data: Dict[str, Any], n: int = 3) -> List[Dict[str, Any]]:
+    def retrieve_similar(self, record_data: Dict[str, Any], n: int = 3, explain: bool = False) -> List[Dict[str, Any]]:
         """Retrieve similar past annotations for a record."""
+        if explain:
+            print(f"\n[STEP] Building search query from record fields...")
+
         # Create a query from the record data
         query_parts = []
         for key, value in record_data.items():
             query_parts.append(f"{key}: {value}")
         query = "\n".join(query_parts)
 
-        return self.search_similar(query, limit=n)
+        if explain:
+            print(f"       Query text:\n{query}")
+
+        return self.search_similar(query, limit=n, explain=explain)
 
     def generate_analysis(
         self,
         record_data: Dict[str, Any],
-        similar_analyses: List[Dict[str, Any]] = None
+        similar_analyses: List[Dict[str, Any]] = None,
+        explain: bool = False
     ) -> Dict[str, Any]:
         """Generate AI analysis for a record. Returns structured data."""
+
+        if explain:
+            print(f"\n[STEP] Building prompt with retrieved examples...")
 
         # Format examples
         examples_text = ""
@@ -425,11 +493,25 @@ class ExpertLearningEngine:
             record=record_text
         )
 
+        if explain:
+            print(f"       Including {len(similar_analyses) if similar_analyses else 0} similar examples")
+            print(f"\n[STEP] Full prompt to be sent to LLM:")
+            print("=" * 60)
+            print(prompt)
+            print("=" * 60)
+
+        if explain:
+            print(f"\n[STEP] Sending request to Gemini gemini-2.0-flash...")
+            print(f"       Using API key: {os.environ.get('GEMINI_API_KEY', 'NOT SET')[:8]}...")
+
         # Call LLM
         response = self.llm_client.models.generate_content(
             model="gemini-2.0-flash",
             contents=prompt
         )
+
+        if explain:
+            print(f"\n[STEP] Response received from LLM ({len(response.text)} chars)")
 
         # Parse JSON response
         raw_text = response.text.strip()
@@ -440,8 +522,14 @@ class ExpertLearningEngine:
             # Remove first line (```json) and last line (```)
             raw_text = "\n".join(lines[1:-1])
 
+        if explain:
+            print(f"\n[STEP] Parsing JSON response...")
+
         try:
             parsed = json.loads(raw_text)
+            if explain:
+                print(f"       Parse successful!")
+                print(f"       Fields: summary, analysis, risk_assessment, patterns, recommended_actions, additional_tests")
             return {
                 'summary': parsed.get('summary', ''),
                 'analysis': parsed.get('analysis', ''),
@@ -455,6 +543,8 @@ class ExpertLearningEngine:
                 'parse_success': True
             }
         except json.JSONDecodeError:
+            if explain:
+                print(f"       Parse FAILED - response is not valid JSON")
             # Fallback: return raw text if JSON parsing fails
             return {
                 'summary': '',

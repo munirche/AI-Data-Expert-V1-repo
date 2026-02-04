@@ -17,6 +17,12 @@ from expert_learning_system_v2 import ExpertLearningEngine
 
 def cmd_load(engine: ExpertLearningEngine, args):
     """Load records from corpus into database."""
+    explain = getattr(args, 'explain', False)
+
+    if explain:
+        print("\n" + "=" * 60)
+        print("EXPLAIN MODE: Loading record from corpus to database")
+        print("=" * 60)
 
     if args.record:
         # Load specific record(s)
@@ -27,16 +33,16 @@ def cmd_load(engine: ExpertLearningEngine, args):
             count = 0
             for record in records:
                 record_id = record[engine.config["record_id_field"]]
-                ann_id = engine.load_from_corpus(str(record_id))
+                ann_id = engine.load_from_corpus(str(record_id), explain=explain)
                 if ann_id:
                     print(f"  Loaded record {record_id} -> annotation {ann_id}")
                     count += 1
             print(f"\n[OK] Loaded {count} records.")
         else:
             # Single record
-            ann_id = engine.load_from_corpus(args.record)
+            ann_id = engine.load_from_corpus(args.record, explain=explain)
             if ann_id:
-                print(f"[OK] Loaded record {args.record} -> annotation {ann_id}")
+                print(f"\n[OK] Loaded record {args.record} -> annotation {ann_id}")
             else:
                 print(f"[ERROR] Record {args.record} not found in corpus.")
     else:
@@ -242,9 +248,19 @@ def cmd_delete(engine: ExpertLearningEngine, args):
 
 def cmd_analyze(engine: ExpertLearningEngine, args):
     """Analyze a record using AI."""
+    explain = getattr(args, 'explain', False)
+
+    if explain:
+        print("\n" + "=" * 60)
+        print("EXPLAIN MODE: AI Analysis Pipeline")
+        print("=" * 60)
 
     # Get record data
     if args.record:
+        if explain:
+            print(f"\n[STEP] Loading record {args.record} from corpus...")
+            print(f"       Corpus file: {engine.config['corpus_path']}")
+
         record = engine.get_corpus_record(args.record)
         if not record:
             print(f"[ERROR] Record {args.record} not found in corpus.")
@@ -255,6 +271,11 @@ def cmd_analyze(engine: ExpertLearningEngine, args):
         record_id_field = engine.config["record_id_field"]
         record_data = {k: record[k] for k in data_fields if k in record}
         record_data[record_id_field] = record[record_id_field]
+
+        if explain:
+            print(f"\n[STEP] Extracting data fields:")
+            for k, v in record_data.items():
+                print(f"         {k}: {v}")
 
         ground_truth = {
             'summary': record.get('summary', ''),
@@ -275,15 +296,21 @@ def cmd_analyze(engine: ExpertLearningEngine, args):
         return
 
     # Retrieve similar
-    print("Retrieving similar past analyses...")
-    similar = engine.retrieve_similar(record_data, n=3)
-    print(f"Found {len(similar)} similar cases.\n")
+    if not explain:
+        print("Retrieving similar past analyses...")
+    similar = engine.retrieve_similar(record_data, n=3, explain=explain)
+    if not explain:
+        print(f"Found {len(similar)} similar cases.\n")
 
     # Generate AI analysis
-    print("Generating AI analysis...\n")
-    result = engine.generate_analysis(record_data, similar)
+    if not explain:
+        print("Generating AI analysis...\n")
+    result = engine.generate_analysis(record_data, similar, explain=explain)
 
-    print("=" * 70)
+    if explain:
+        print(f"\n[STEP] Displaying results...")
+
+    print("\n" + "=" * 70)
     print("RECORD DATA:")
     print("-" * 70)
     for k, v in record_data.items():
@@ -430,6 +457,7 @@ def main():
     load_parser = subparsers.add_parser('load', help='Load records from corpus')
     load_parser.add_argument('n', type=int, nargs='?', help='Number of records to load')
     load_parser.add_argument('--record', type=str, help='Specific record ID or range (e.g., 5-10)')
+    load_parser.add_argument('--explain', action='store_true', help='Show step-by-step explanation')
 
     # list command
     list_parser = subparsers.add_parser('list', help='List annotations')
@@ -466,6 +494,7 @@ def main():
     analyze_parser.add_argument('--file', type=str, help='Path to record JSON file')
     analyze_parser.add_argument('--compare', action='store_true', help='Compare with ground truth')
     analyze_parser.add_argument('--batch', action='store_true', help='Batch mode (no prompts)')
+    analyze_parser.add_argument('--explain', action='store_true', help='Show step-by-step explanation')
 
     args = parser.parse_args()
 

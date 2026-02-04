@@ -142,7 +142,16 @@ Load records from corpus into database.
 cli_v2.py load N                  # Load first N records
 cli_v2.py load --record 5         # Load specific record
 cli_v2.py load --record 5-10      # Load range
+cli_v2.py load --record 5 --explain   # Load with step-by-step explanation
 ```
+
+**--explain mode:** Shows each step as it executes:
+- Reading record fields from corpus
+- Preparing embedding request to model
+- Receiving embedding vector
+- Saving annotation to database
+
+Purpose: Educational tool to demonstrate the RAG workflow in action.
 
 ### add
 
@@ -178,7 +187,21 @@ cli_v2.py analyze --record 15           # From corpus
 cli_v2.py analyze --file record.json    # From file
 cli_v2.py analyze --record 15 --compare # Show ground truth comparison
 cli_v2.py analyze --record 11-20 --batch # Batch with metrics only
+cli_v2.py analyze --record 15 --explain # Analyze with step-by-step explanation
 ```
+
+**--explain mode:** Shows each step as it executes:
+- Loading record from corpus
+- Building query from record fields
+- Requesting embedding for similarity search
+- Retrieving similar annotations from database
+- Building prompt with examples
+- Displaying the full prompt before sending
+- Sending request to LLM
+- Parsing structured JSON response
+- Displaying results
+
+Purpose: Educational tool to demonstrate the full RAG analysis pipeline.
 
 **Interactive workflow:**
 1. Load record
@@ -343,6 +366,7 @@ For development and testing, the first use case is patient bloodwork analysis.
 - [x] Add batch mode
 - [x] Add delete command
 - [x] Structured AI output (JSON with all fields: summary, analysis, risk, patterns, actions, tests)
+- [x] Add --explain flag for load and analyze commands (educational mode)
 - [ ] Expand corpus to 50 cases
 - [ ] Measure baseline accuracy
 

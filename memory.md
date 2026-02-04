@@ -179,3 +179,10 @@ This allows multiple versions to coexist during development.
   - Remaining: expand corpus to 50 cases, measure baseline accuracy
   - Added `requirements.txt` for dependency management
 
+## Possible Improvements
+
+1. **Embedding structure:** Currently only `summary + analysis` is embedded. Evaluate and test different structures:
+   - With record data fields included (e.g., "age: 55, glucose: 94, ...")
+   - Without record data fields (current)
+   - Measure retrieval quality differences between approaches
+
