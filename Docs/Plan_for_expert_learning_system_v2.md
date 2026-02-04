@@ -367,7 +367,7 @@ For development and testing, the first use case is patient bloodwork analysis.
 - [x] Add delete command
 - [x] Structured AI output (JSON with all fields: summary, analysis, risk, patterns, actions, tests)
 - [x] Add --explain flag for load and analyze commands (educational mode)
-- [ ] Expand corpus to 50 cases
+- [x] Expand corpus to 50 cases
 - [ ] Measure baseline accuracy
 
 ### Phase 3: Refinement
