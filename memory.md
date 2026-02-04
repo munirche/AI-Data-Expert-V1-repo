@@ -186,3 +186,22 @@ This allows multiple versions to coexist during development.
    - Without record data fields (current)
    - Measure retrieval quality differences between approaches
 
+2. **Similar examples selection:** Currently fixed at 3 examples. Consider:
+   - Similarity threshold (only include cases above e.g., 60% similarity)
+   - Dynamic count based on database size
+   - Configurable via CLI flag or config.json
+   - Combined approach: "Top N, but only if similarity > X%"
+
+3. **Local embeddings:** Research and possibly adopt local embeddings (e.g., `sentence-transformers`, Ollama) so the vector store stops depending on Gemini's embedding API. Evaluate trade-offs: latency, accuracy, cost.
+
+4. **Multi-use-case configuration:** Extract settings to config files per use case, allowing multiple domains to coexist:
+   ```
+   projects/
+   ├── patient_bloodwork/
+   │   ├── config.json
+   │   └── database/
+   ├── revenue_analysis/
+   │   ├── config.json
+   │   └── database/
+   ```
+
