@@ -25,17 +25,26 @@ from google import genai
 
 @register("gemini-genai-v2")
 class GeminiEmbedding(TextEmbeddingFunction):
-    """Custom embedding function using google-genai."""
+    """Custom embedding function using google-genai for LanceDB integration."""
 
     model_name: str = "text-embedding-004"
 
     @cached_property
     def _client(self):
+        """Initialize and cache the Gemini API client."""
         api_key = os.environ.get('GEMINI_API_KEY')
         return genai.Client(api_key=api_key)
 
     def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings for a list of texts."""
+        """
+        Generate embeddings for a list of texts using Gemini API.
+
+        Args:
+            texts: List of text strings to embed.
+
+        Returns:
+            List of embedding vectors (each 768 floats).
+        """
         embeddings = []
         for text in texts:
             result = self._client.models.embed_content(
@@ -46,7 +55,7 @@ class GeminiEmbedding(TextEmbeddingFunction):
         return embeddings
 
     def ndims(self) -> int:
-        """Return embedding dimensions."""
+        """Return embedding dimensions (768 for text-embedding-004)."""
         return 768
 
 
@@ -81,10 +90,20 @@ class Annotation(LanceModel):
 # =============================================================================
 
 class ExpertLearningEngine:
-    """Generic RAG engine for expert learning system."""
+    """
+    Generic RAG engine for expert learning system.
+
+    Handles corpus loading, annotation storage, similarity search, and AI analysis.
+    Domain-specific configuration is loaded from config.json.
+    """
 
     def __init__(self, config_path: str = "./config.json"):
-        """Initialize engine with configuration."""
+        """
+        Initialize engine with configuration.
+
+        Args:
+            config_path: Path to the JSON configuration file.
+        """
         self.config = self._load_config(config_path)
         self.db = lancedb.connect(self.config["database_path"])
         self.table_name = "expert_annotations"
@@ -96,12 +115,20 @@ class ExpertLearningEngine:
         self.llm_client = genai.Client(api_key=api_key)
 
     def _load_config(self, config_path: str) -> Dict[str, Any]:
-        """Load configuration from JSON file."""
+        """
+        Load configuration from JSON file.
+
+        Args:
+            config_path: Path to the configuration file.
+
+        Returns:
+            Dictionary containing configuration settings.
+        """
         with open(config_path, 'r') as f:
             return json.load(f)
 
     def _init_table(self):
-        """Initialize or open the database table."""
+        """Initialize or open the database table. Creates table on first insert if needed."""
         try:
             self.table = self.db.open_table(self.table_name)
         except Exception:
@@ -113,11 +140,24 @@ class ExpertLearningEngine:
     # -------------------------------------------------------------------------
 
     def load_corpus(self) -> pd.DataFrame:
-        """Load the corpus CSV file."""
+        """
+        Load the corpus CSV file.
+
+        Returns:
+            DataFrame containing all corpus records.
+        """
         return pd.read_csv(self.config["corpus_path"])
 
     def get_corpus_record(self, record_id: str) -> Optional[Dict[str, Any]]:
-        """Get a single record from corpus by ID."""
+        """
+        Get a single record from corpus by ID.
+
+        Args:
+            record_id: The record identifier to look up.
+
+        Returns:
+            Dictionary of record fields, or None if not found.
+        """
         df = self.load_corpus()
         record_id_field = self.config["record_id_field"]
 
@@ -130,7 +170,16 @@ class ExpertLearningEngine:
         return matches.iloc[0].to_dict()
 
     def get_corpus_range(self, start: int, end: int) -> List[Dict[str, Any]]:
-        """Get a range of records from corpus (by row index)."""
+        """
+        Get a range of records from corpus by row index.
+
+        Args:
+            start: Starting row index (0-based).
+            end: Ending row index (exclusive).
+
+        Returns:
+            List of record dictionaries.
+        """
         df = self.load_corpus()
         return df.iloc[start:end].to_dict('records')
 
@@ -151,7 +200,24 @@ class ExpertLearningEngine:
         tags: List[str] = None,
         explain: bool = False
     ) -> str:
-        """Store an expert annotation in the database."""
+        """
+        Store an expert annotation in the database.
+
+        Args:
+            record_id: Unique identifier for the source record.
+            record_data: Dictionary of the original record fields.
+            summary: Brief summary of findings (used for embedding).
+            analysis: Detailed analysis text (used for embedding).
+            risk_assessment: Risk level (low/moderate/high/critical).
+            patterns: List of pattern dictionaries with type/field/description.
+            recommended_actions: List of recommended action strings.
+            additional_tests: List of additional test strings.
+            tags: List of tags for categorization.
+            explain: If True, print step-by-step explanation.
+
+        Returns:
+            The generated annotation_id (8-character UUID).
+        """
 
         annotation_id = str(uuid.uuid4())[:8]
 
@@ -206,7 +272,16 @@ class ExpertLearningEngine:
         return annotation_id
 
     def load_from_corpus(self, record_id: str, explain: bool = False) -> Optional[str]:
-        """Load a record from corpus and store its annotation."""
+        """
+        Load a record from corpus and store its annotation in the database.
+
+        Args:
+            record_id: The record identifier to load from corpus.
+            explain: If True, print step-by-step explanation.
+
+        Returns:
+            The annotation_id if successful, None if record not found.
+        """
         if explain:
             print(f"\n[STEP] Reading record {record_id} from corpus...")
             print(f"       Corpus file: {self.config['corpus_path']}")
@@ -270,7 +345,15 @@ class ExpertLearningEngine:
         )
 
     def load_n_from_corpus(self, n: int) -> List[str]:
-        """Load first N records from corpus into database."""
+        """
+        Load first N records from corpus into database.
+
+        Args:
+            n: Number of records to load from the beginning of corpus.
+
+        Returns:
+            List of annotation_ids for successfully loaded records.
+        """
         df = self.load_corpus()
         record_id_field = self.config["record_id_field"]
 
@@ -284,7 +367,16 @@ class ExpertLearningEngine:
         return loaded
 
     def list_annotations(self, limit: int = None, tag: str = None) -> List[Dict[str, Any]]:
-        """List all annotations in the database."""
+        """
+        List annotations in the database.
+
+        Args:
+            limit: Maximum number of annotations to return (None for all).
+            tag: Filter to only annotations containing this tag.
+
+        Returns:
+            List of annotation summary dictionaries (id, record_id, summary, risk, tags, timestamp).
+        """
         if self.table is None:
             return []
 
@@ -310,7 +402,15 @@ class ExpertLearningEngine:
         return results
 
     def get_annotation(self, annotation_id: str) -> Optional[Dict[str, Any]]:
-        """Get full details of a specific annotation."""
+        """
+        Get full details of a specific annotation.
+
+        Args:
+            annotation_id: The annotation identifier to retrieve.
+
+        Returns:
+            Dictionary with all annotation fields, or None if not found.
+        """
         if self.table is None:
             return None
 
@@ -336,7 +436,17 @@ class ExpertLearningEngine:
         }
 
     def search_similar(self, query: str, limit: int = 5, explain: bool = False) -> List[Dict[str, Any]]:
-        """Search for similar annotations."""
+        """
+        Search for similar annotations using vector similarity.
+
+        Args:
+            query: Text to search for (will be embedded and compared).
+            limit: Maximum number of results to return.
+            explain: If True, print step-by-step explanation.
+
+        Returns:
+            List of annotation dictionaries with similarity_score added.
+        """
         if self.table is None:
             return []
 
@@ -372,7 +482,13 @@ class ExpertLearningEngine:
         return similar
 
     def get_stats(self) -> Dict[str, Any]:
-        """Get database statistics."""
+        """
+        Get database and corpus statistics.
+
+        Returns:
+            Dictionary with total_annotations, corpus_total, corpus_loaded,
+            corpus_remaining, risk_distribution, and top_tags.
+        """
         corpus_df = self.load_corpus()
         corpus_count = len(corpus_df)
 
@@ -411,7 +527,12 @@ class ExpertLearningEngine:
         }
 
     def reset_database(self) -> bool:
-        """Clear all annotations from the database."""
+        """
+        Clear all annotations from the database.
+
+        Returns:
+            True if successful, False if an error occurred.
+        """
         try:
             if self.table_name in self.db.table_names():
                 self.db.drop_table(self.table_name)
@@ -421,7 +542,16 @@ class ExpertLearningEngine:
             return False
 
     def delete_annotation(self, annotation_id: str = None, record_id: str = None) -> int:
-        """Delete annotation(s) by annotation_id or record_id. Returns count deleted."""
+        """
+        Delete annotation(s) from the database.
+
+        Args:
+            annotation_id: Delete specific annotation by its ID.
+            record_id: Delete all annotations for this record ID.
+
+        Returns:
+            Number of annotations deleted.
+        """
         if self.table is None:
             return 0
 
@@ -447,7 +577,17 @@ class ExpertLearningEngine:
     # -------------------------------------------------------------------------
 
     def retrieve_similar(self, record_data: Dict[str, Any], n: int = 3, explain: bool = False) -> List[Dict[str, Any]]:
-        """Retrieve similar past annotations for a record."""
+        """
+        Retrieve similar past annotations for a record.
+
+        Args:
+            record_data: Dictionary of record fields to find similar cases for.
+            n: Number of similar annotations to retrieve.
+            explain: If True, print step-by-step explanation.
+
+        Returns:
+            List of similar annotation dictionaries with similarity_score.
+        """
         if explain:
             print(f"\n[STEP] Building search query from record fields...")
 
@@ -468,7 +608,18 @@ class ExpertLearningEngine:
         similar_analyses: List[Dict[str, Any]] = None,
         explain: bool = False
     ) -> Dict[str, Any]:
-        """Generate AI analysis for a record. Returns structured data."""
+        """
+        Generate AI analysis for a record using retrieved examples.
+
+        Args:
+            record_data: Dictionary of record fields to analyze.
+            similar_analyses: List of similar past annotations for context.
+            explain: If True, print step-by-step explanation and full prompt.
+
+        Returns:
+            Dictionary with summary, analysis, risk_assessment, patterns,
+            recommended_actions, additional_tests, and parse_success flag.
+        """
 
         if explain:
             print(f"\n[STEP] Building prompt with retrieved examples...")
