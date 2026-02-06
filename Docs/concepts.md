@@ -12,6 +12,9 @@ A reference for key concepts encountered during research and development.
    - [Generate Phase](#generate-phase)
 2. [LLM Calls via API: Possible Approaches](#llm-calls-via-api-possible-approaches)
 3. [Realistic Limits of Current RAG Implementation](#realistic-limits-of-current-rag-implementation)
+4. [External Medical Data Sources](#external-medical-data-sources)
+   - [EMR Integration via API](#emr-integration-via-api)
+   - [Public Medical Databases](#public-medical-databases)
 
 ---
 
@@ -514,5 +517,116 @@ The current use case (patient bloodwork) is a **good fit** because:
 ### Key Takeaway
 
 RAG with embeddings is excellent for **structured data with explicit patterns** where expert reasoning can be documented. It's not ideal for **temporal, visual, or deeply interconnected data** where relationships span beyond what text embeddings can capture.
+
+---
+
+## External Medical Data Sources
+
+Reference information for integrating with electronic medical records and public biomedical databases.
+
+---
+
+### EMR Integration via API
+
+Electronic Medical Record (EMR) systems can be accessed programmatically for data exchange.
+
+#### Common Standards
+
+**HL7 FHIR (Fast Healthcare Interoperability Resources)**
+- Modern REST-based standard, uses JSON/XML
+- Becoming the industry standard (mandated by US regulations since 2020)
+- Resources like Patient, Observation, Condition, MedicationRequest
+
+**HL7 v2**
+- Older message-based standard (pipe-delimited format)
+- Still widely used for lab results, ADT (admit/discharge/transfer)
+
+#### Major EMR Systems & Their APIs
+
+| EMR | API Approach |
+|-----|--------------|
+| **Epic** | Epic on FHIR, App Orchard marketplace |
+| **Cerner** (Oracle Health) | FHIR R4, Millennium platform |
+| **Allscripts** | FHIR, Open API |
+| **athenahealth** | athenaOne API (proprietary + FHIR) |
+| **Meditech** | FHIR (newer versions) |
+
+#### Authentication
+
+- **SMART on FHIR** - OAuth 2.0 framework specifically for healthcare
+- Supports both patient-facing and provider-facing apps
+- Scopes define what data the app can access
+
+#### Key Challenges
+
+1. **Access** - Most EMRs require vendor approval and contracts with healthcare organizations
+2. **HIPAA compliance** - Must handle PHI securely
+3. **Certification** - Apps may need ONC certification for clinical use
+4. **Testing** - Sandbox environments vary in quality
+
+#### Getting Started
+
+- Epic: developer.epic.com (free sandbox)
+- Cerner: developer.cerner.com
+- SMART on FHIR sandbox: launch.smarthealthit.org
+
+---
+
+### Public Medical Databases
+
+Free and open databases for medical/biomedical reference data.
+
+#### OMIM (Online Mendelian Inheritance in Man)
+
+- Database of human genes and genetic disorders
+- **API access**: Requires free registration at omim.org/api
+- Returns JSON/XML
+- Rate limited (can request higher limits)
+- Good for: gene-disease relationships, phenotypes, inheritance patterns
+
+#### NCBI Databases (National Center for Biotechnology Information)
+
+All accessible via **E-utilities API** (eutils.ncbi.nlm.nih.gov):
+
+| Database | Content |
+|----------|---------|
+| **PubMed** | Biomedical literature |
+| **ClinVar** | Clinical variant interpretations |
+| **dbSNP** | Genetic variants |
+| **Gene** | Gene records |
+| **MedGen** | Medical genetics information |
+
+- Free, no API key required (but recommended for higher rate limits)
+- Returns XML or JSON
+
+#### Other Key Databases
+
+| Database | Content | Access |
+|----------|---------|--------|
+| **UniProt** | Protein sequences/function | REST API, free |
+| **DrugBank** | Drug data | Free for academic, paid for commercial |
+| **OpenFDA** | FDA drug/device adverse events | REST API, free |
+| **RxNorm** | Drug nomenclature | REST API via NIH |
+| **HPO** | Human Phenotype Ontology | Free download + API |
+| **DisGeNET** | Gene-disease associations | Free academic |
+
+#### Medical Terminologies
+
+| Standard | Purpose | Access |
+|----------|---------|--------|
+| **SNOMED CT** | Clinical terms | Free via UMLS (requires account) |
+| **ICD-10** | Diagnosis codes | Free via CMS/WHO |
+| **LOINC** | Lab test codes | Free registration |
+| **RxNorm** | Drug codes | Free via NIH |
+
+#### Python Libraries
+
+```python
+# Biopython - NCBI access
+from Bio import Entrez
+
+# PyMedTermino - medical terminologies
+# mygene - gene queries
+```
 
 ---
