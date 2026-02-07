@@ -82,12 +82,14 @@ AI Data Expert V1/
 |   +-- cli_v2.py                            # (existing)
 |   +-- export_db_v1.py                      # (existing)
 |   +-- launch_lance_viewer.py               # (existing)
+|   +-- launch_data_entry.py                 # Launches Streamlit app
 +-- Docs/
 |   +-- Plan_for_ai_data_entry_v1.md         # Plan document
 |   +-- how_it_works_ai_data_entry_v1.md     # Documentation (after implementation)
 |   +-- ... (existing docs)
++-- .ssl/                                     # Self-signed SSL certs (not in git)
 +-- config_data_entry.json                    # Use case configuration
-+-- data_entry_output/                        # Local output (add to .gitignore)
++-- data_entry_output/                        # Local output (not in git)
 +-- config.json                               # (existing)
 +-- memory.md                                 # (existing)
 +-- requirements.txt                          # (existing, add new deps)
@@ -99,6 +101,7 @@ AI Data Expert V1/
 |------|---------|
 | `Code/data_entry/ai_data_entry_v1.py` | Engine class (transcription, extraction, validation) |
 | `Code/data_entry/app_data_entry_v1.py` | Streamlit web app (UI layer) |
+| `Code/launch_data_entry.py` | Launcher script for the Streamlit app |
 | `config_data_entry.json` | Use case configuration (fields, prompts, Whisper settings) |
 | `data_entry_output/` | Output directory for JSON files when running locally |
 | `Docs/Plan_for_ai_data_entry_v1.md` | Plan document (this file) |
@@ -107,8 +110,8 @@ AI Data Expert V1/
 
 | File | Change |
 |------|--------|
-| `requirements.txt` | Added `streamlit`, `faster-whisper` |
-| `.gitignore` | Added `data_entry_output/`, `!config_data_entry.json` |
+| `requirements.txt` | Added `streamlit>=1.44.0`, `faster-whisper` |
+| `.gitignore` | Added `data_entry_output/`, `.ssl/`, `!config_data_entry.json` |
 | `memory.md` | Added project structure entries and time log |
 
 ## Configuration Design (`config_data_entry.json`)
@@ -128,7 +131,8 @@ Defines the use case without changing engine code.
       "type": "string | enum | array | object",
       "required": true/false,
       "description": "What this field represents",
-      "values": ["option1", "option2"]
+      "values": ["option1", "option2"],
+      "format": "Format instructions for the LLM (e.g., '(XXX)XXXXXXX')"
     }
   },
 
@@ -140,6 +144,7 @@ Defines the use case without changing engine code.
 - `extraction_fields` defines what the LLM should extract from the transcript
 - `extraction_prompt_template` uses `{transcript}` and `{schema}` placeholders
 - `whisper_model` controls accuracy vs speed (tiny/base/small/medium/large)
+- `format` (optional) tells the LLM how to format specific field values
 - Changing this file changes the entire use case
 
 ## Architecture
@@ -193,30 +198,42 @@ Already installed: `google-genai`, `numpy`, `pandas`
 
 ## Implementation Phases
 
-### Phase 1: Working MVP (current)
+### Phase 1: Working MVP (complete)
 - [x] Set up `Code/data_entry/` subfolder
 - [x] Create `config_data_entry.json` with a sample use case
 - [x] Implement engine: `transcribe`, `extract_fields`, `validate_fields`, `save_json`, `to_json_string`
 - [x] Implement Streamlit app: audio recording, transcript display, extract button, editable fields
-- [x] Add download button for JSON output
+- [x] Add download button for output
 - [x] Batch workflow: record -> stop -> transcribe -> extract -> edit -> download
-- [x] Test on desktop browser -- first trial 02/06/2026: pipeline works end to end (record -> transcribe -> extract -> fields populated)
-- [ ] Test on iPhone Safari (via local network)
+- [x] Test on desktop browser -- first trial 02/06/2026: pipeline works end to end
+- [x] Config-driven field format hints (e.g., phone number format, address format)
+- [x] Form shows field descriptions instead of field keys
+- [x] Hidden Streamlit header/footer/menu for cleaner UI
 
-### Known Issues
-- **Audio cut short (02/06/2026):** During first test, audio/transcription was cut short. Need to determine if it's the recording (st.audio_input) or the transcription (faster-whisper) that's truncating. Investigate next session.
-
-### Phase 2: Polish
+### Phase 2: Polish (partially complete)
 - [ ] Better form validation (required fields highlighted, missing fields flagged)
 - [ ] Error handling (mic not found, Whisper model download, Gemini API errors)
 - [ ] Save raw audio option
-- [ ] Improve extraction prompt based on test results
+- [x] Improve extraction prompt based on test results (format hints, wrong/correct examples)
 
-### Phase 3: Web Deployment
-- [ ] Deploy to Streamlit Community Cloud (free)
+### Phase 3: Web Deployment (complete)
+- [x] Deploy to Streamlit Community Cloud (free)
+- [x] Verified full workflow on deployed version (desktop + iPhone)
+- [x] iPhone mic works via Streamlit Cloud HTTPS
 - [ ] Point custom domain via Namecheap DNS
-- [ ] Test Whisper model size on cloud
-- [ ] Verify full workflow on deployed version
+- [ ] Test Whisper model size on cloud (currently using "base")
+
+### Deployment Notes (02/07/2026)
+- **Streamlit Cloud URL:** ai-data-expert-v1-repo-u9czepkhfeuddbsb8zxwmi.streamlit.app
+- **iPhone local HTTPS:** Does not work. iOS Safari blocks mic on self-signed certs (silent failure). Cloudflare Tunnel loaded the page but mic still didn't work via st.audio_input on iOS. Solution: deploy to Streamlit Cloud for real HTTPS.
+- **Streamlit version:** Pinned to `>=1.44.0` (Cloud installed 1.19.0 by default, incompatible with altair 6.x)
+- **Python version on Cloud:** 3.12 (3.14 not available, code is compatible)
+- **Cache note:** After config changes, must "Reboot app" from Manage App menu to clear `@st.cache_resource`
+
+### Known Issues
+- **Audio cut short (02/06/2026):** During first desktop test, audio/transcription was cut short. Not yet determined if it's the recording (st.audio_input) or the transcription (faster-whisper) truncating.
+- **iOS local mic access:** st.audio_input does not work on iPhone over local network (HTTP or self-signed HTTPS). Solved by deploying to Streamlit Cloud.
+- **Streamlit free tier branding:** "Powered by Streamlit" footer cannot be removed on free plan.
 
 ### Phase 4: Real-Time Transcription (Desktop Enhancement)
 - [ ] Stream audio in chunks, run Whisper on each chunk
