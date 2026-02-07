@@ -86,6 +86,8 @@ class DataEntryEngine:
             line = f'- "{name}" ({definition["type"]}): {definition["description"]}'
             if definition["type"] == "enum" and "values" in definition:
                 line += f' Allowed values: {definition["values"]}'
+            if "format" in definition:
+                line += f' Format: {definition["format"]}'
             schema_lines.append(line)
         schema_text = "\n".join(schema_lines)
 
