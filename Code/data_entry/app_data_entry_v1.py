@@ -167,7 +167,8 @@ if st.session_state.fields_data:
         value = st.session_state.fields_data.get(field_name)
         field_type = definition.get("type", "string")
         required = definition.get("required", False)
-        label = f"{field_name} *" if required else field_name
+        desc = definition.get("description", field_name)
+        label = f"{desc} *" if required else desc
 
         if field_type == "enum":
             options = definition.get("values", [])

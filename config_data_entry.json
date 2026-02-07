@@ -30,7 +30,7 @@
       "type": "enum",
       "required": true,
       "description": "Sex at birth",
-      "values": ["male", "female"]
+      "values": ["Male", "Female"]
     },
     "address": {
       "type": "string",
@@ -47,7 +47,8 @@
     "emergency_contact_name": {
       "type": "string",
       "required": true,
-      "description": "Emergency contact full name"
+      "description": "Emergency contact full name",
+      "format": "Capitalize first letter of each word. Example: John Smith"
     },
     "emergency_contact_phone": {
       "type": "string",
@@ -58,7 +59,8 @@
     "emergency_contact_relation": {
       "type": "string",
       "required": true,
-      "description": "Emergency contact relationship to patient (e.g., spouse, parent, sibling)"
+      "description": "Emergency contact relationship to patient (e.g., Spouse, Parent, Sibling)",
+      "format": "Capitalize first letter. Example: Spouse"
     }
   },
 
