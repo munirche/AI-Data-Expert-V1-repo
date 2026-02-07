@@ -1,5 +1,5 @@
 google-genai
 lancedb
 pandas
-streamlit
+streamlit>=1.44.0
 faster-whisper
