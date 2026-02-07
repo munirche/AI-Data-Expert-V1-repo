@@ -223,31 +223,16 @@ if st.session_state.fields_data:
     # ACTION BUTTONS
     # ==========================================================================
 
-    # Show Save Locally only when running on local machine
-    is_local = not os.environ.get("STREAMLIT_SHARING_MODE")
-
-    if is_local:
-        col_download, col_save, col_clear = st.columns(3)
-    else:
-        col_download, col_clear = st.columns(2)
+    col_download, col_clear = st.columns(2)
 
     with col_download:
         json_string = engine.to_json_string(st.session_state.fields_data)
         st.download_button(
-            label="Download JSON",
+            label="Download",
             data=json_string,
-            file_name="data_entry.json",
-            mime="application/json",
+            file_name="data_entry.txt",
+            mime="text/plain",
         )
-
-    if is_local:
-        with col_save:
-            if st.button("Save Locally"):
-                try:
-                    filepath = engine.save_json(st.session_state.fields_data)
-                    st.success(f"Saved to {filepath}")
-                except Exception as e:
-                    st.error(f"Save failed: {e}")
 
     with col_clear:
         if st.button("Clear All"):
