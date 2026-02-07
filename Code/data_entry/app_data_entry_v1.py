@@ -24,6 +24,18 @@ from ai_data_entry_v1 import DataEntryEngine
 
 st.set_page_config(page_title="AI Data Entry", layout="centered")
 
+# Hide Streamlit header and footer
+st.markdown(
+    """
+    <style>
+    header[data-testid="stHeader"] { display: none; }
+    footer { display: none; }
+    #MainMenu { display: none; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # =============================================================================
 # INITIALIZATION
