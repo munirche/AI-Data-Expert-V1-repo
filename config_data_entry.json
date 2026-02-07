@@ -36,7 +36,7 @@
       "type": "string",
       "required": true,
       "description": "Patient full address (street, city, state, zip)",
-      "format": "Numbers must not be separated by dashes. Example: 1234 Main St, Springfield, IL 62701"
+      "format": "Write all numbers as plain digits with no dashes or hyphens. WRONG: 1-2-3-4 Main St. CORRECT: 1234 Main St. Example: 1234 Main St, Springfield, IL 62701"
     },
     "phone_number": {
       "type": "string",
