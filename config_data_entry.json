@@ -1,0 +1,48 @@
+{
+  "use_case_name": "Patient Bloodwork Analysis",
+  "output_directory": "./data_entry_output",
+
+  "whisper_model": "base",
+  "whisper_language": "en",
+
+  "extraction_fields": {
+    "record_id": {
+      "type": "string",
+      "required": true,
+      "description": "Patient record identifier"
+    },
+    "summary": {
+      "type": "string",
+      "required": true,
+      "description": "Brief 1-2 sentence summary of key findings"
+    },
+    "analysis": {
+      "type": "string",
+      "required": true,
+      "description": "Detailed analysis explaining clinical significance"
+    },
+    "risk_assessment": {
+      "type": "enum",
+      "required": true,
+      "description": "Overall risk level for this patient",
+      "values": ["low", "moderate", "high", "critical"]
+    },
+    "patterns": {
+      "type": "array",
+      "required": false,
+      "description": "List of detected patterns (e.g., abnormal_value, correlation, risk_indicator)"
+    },
+    "recommended_actions": {
+      "type": "array",
+      "required": false,
+      "description": "List of recommended follow-up actions"
+    },
+    "tags": {
+      "type": "array",
+      "required": false,
+      "description": "Tags for categorization (e.g., diabetes, renal, cardiac)"
+    }
+  },
+
+  "extraction_prompt_template": "You are a data extraction assistant. Extract structured fields from the following transcript.\n\nTranscript:\n{transcript}\n\nExtract the following fields into a JSON object:\n{schema}\n\nRules:\n- Only extract information that is explicitly stated or clearly implied in the transcript.\n- If a field's value is not mentioned, set it to null.\n- For array fields, return an empty array [] if nothing is mentioned.\n- For enum fields, pick the closest matching value from the allowed options.\n- Return ONLY valid JSON, no markdown, no extra text."
+}

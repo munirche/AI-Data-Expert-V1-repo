@@ -8,4 +8,8 @@ lancedb/
 *.csv
 *.json
 !config.json
+!config_data_entry.json
 !corpus/*.csv
+
+# Data entry output
+data_entry_output/

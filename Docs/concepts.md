@@ -15,6 +15,7 @@ A reference for key concepts encountered during research and development.
 4. [External Medical Data Sources](#external-medical-data-sources)
    - [EMR Integration via API](#emr-integration-via-api)
    - [Public Medical Databases](#public-medical-databases)
+5. [HIPAA-Compliant Speech Recognition](#hipaa-compliant-speech-recognition)
 
 ---
 
@@ -628,5 +629,62 @@ from Bio import Entrez
 # PyMedTermino - medical terminologies
 # mygene - gene queries
 ```
+
+---
+
+## HIPAA-Compliant Speech Recognition
+
+When building voice-enabled medical applications, HIPAA requires that Protected Health Information (PHI) never leaves your controlled environment unless the receiving service has a signed Business Associate Agreement (BAA).
+
+### Speech-to-Text Options Compared
+
+| Approach | PHI leaves your machine? | BAA available? | HIPAA viable? |
+|----------|--------------------------|----------------|---------------|
+| **Whisper local** | No - all processing on your machine | Not needed | Yes |
+| **Google Speech API** | Yes - audio sent to Google Cloud | Yes (Google Cloud has BAA) | Yes, but requires setup |
+| **Gemini API (free tier)** | Yes - audio sent to Google | **No** (free tier has no BAA) | **No** |
+| **Deepgram** | Yes - audio sent to cloud | Yes (BAA available) | Yes, enterprise plan |
+| **AssemblyAI** | Yes - audio sent to cloud | Yes (BAA available) | Yes, enterprise plan |
+
+### Why Local Processing Is the Safest Path
+
+Running speech-to-text locally means audio never leaves your machine. No BAA needed, no compliance paperwork, no risk of PHI exposure during transmission.
+
+**OpenAI Whisper (local)**
+- Runs entirely on your computer
+- Free, open-source (MIT license)
+- 95-97% accuracy on clear audio
+- Supports 99 languages
+- No internet connection required
+
+### Full Pipeline HIPAA Considerations
+
+Speech-to-text is only one part of the pipeline. Every step that touches PHI must be evaluated:
+
+```
+Microphone capture    → Local (safe)
+Speech-to-text        → Whisper local (safe)
+Text extraction (LLM) → Cloud API = PHI exposure risk
+Storage               → Local database (safe)
+```
+
+For a fully HIPAA-compliant pipeline, the LLM extraction step also needs a local option:
+
+| Phase | STT | LLM Extraction | HIPAA Status |
+|-------|-----|----------------|--------------|
+| **Development** | Whisper local | Gemini API (free tier) | OK with simulated data only |
+| **Production** | Whisper local | Local LLM (e.g., Ollama) | Fully HIPAA-compliant |
+
+### Local LLM Options for Production
+
+| Tool | Models | Notes |
+|------|--------|-------|
+| **Ollama** | Llama 3, Mistral, Phi-3 | Easiest setup, CLI-based |
+| **LM Studio** | Many open-source models | GUI application |
+| **llama.cpp** | GGUF format models | Lowest-level, most control |
+
+### Key Takeaway
+
+Design with HIPAA in mind from the start by choosing local processing where possible. Use cloud APIs only during development with simulated data. When moving to production with real PHI, swap cloud components for local alternatives without changing the overall architecture.
 
 ---

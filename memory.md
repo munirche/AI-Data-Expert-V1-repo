@@ -123,6 +123,9 @@ AI Data Expert V1/
 │   ├── Discussion_expert_learning_system_v1.md      # Design notes and improvements
 │   └── Plan_for_expert_learning_system_v2.md        # V2 implementation plan
 ├── Code/
+│   ├── data_entry/
+│   │   ├── ai_data_entry_v1.py                      # AI Data Entry engine (voice → JSON)
+│   │   └── app_data_entry_v1.py                     # Streamlit web app for data entry
 │   ├── expert_learning_system_v1.py                 # V1 RAG demo (reference)
 │   ├── expert_learning_system_v2.py                 # V2 generic RAG engine
 │   ├── cli_v2.py                                    # V2 CLI interface
@@ -130,7 +133,9 @@ AI Data Expert V1/
 │   └── launch_lance_viewer.py                       # Opens Lance Data Viewer in browser
 ├── corpus/
 │   └── corpus.csv                                   # Ground truth test cases (15 cases)
-├── config.json                                      # Use case configuration
+├── config.json                                      # Use case configuration (V2 expert system)
+├── config_data_entry.json                           # Use case configuration (data entry)
+├── data_entry_output/                               # Data entry JSON output (not in git)
 ├── expert_learning_system_v1_db/                    # V1 LanceDB database (not in git)
 ├── expert_learning_system_v2_db/                    # V2 LanceDB database (not in git)
 ├── memory.md
@@ -148,6 +153,8 @@ This allows multiple versions to coexist during development.
 
 ## Time Log
 
+### Project 1: Expert Learning System (V1/V2)
+
 | Date       | Hours | Description                              |
 |------------|-------|------------------------------------------|
 | 01/30/2026 | 2     | Project setup, research, RAG concepts    |
@@ -161,7 +168,19 @@ This allows multiple versions to coexist during development.
 | 02/03/2026 | 3     | Delete command, structured AI output, --explain mode, corpus expansion, docstrings, V2 documentation |
 | 02/03/2026 | 0.4   | Embeddings investigation: models, dimensions, PubMedBERT |
 
-**Total: 15.4 hours**
+**Project 1 total: 15.4 hours**
+
+### Project 2: AI Data Entry V1
+
+| Date       | Hours | Description                              |
+|------------|-------|------------------------------------------|
+| 02/06/2026 | 2     | Plan, engine, Streamlit app (Phase 1 MVP). Switched from pywhispercpp to faster-whisper (no C++ compiler needed on Windows). |
+
+**Project 2 total: 2 hours**
+
+---
+
+**Total across all projects: 17.4 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.
@@ -181,6 +200,12 @@ This allows multiple versions to coexist during development.
   - Phase 2 mostly complete: analyze command with compare and batch modes working
   - Remaining: expand corpus to 50 cases, measure baseline accuracy
   - Added `requirements.txt` for dependency management
+- **02/06/2026:**
+  - Started AI Data Entry V1: voice-to-structured-data tool (new project in same repo)
+  - Engine + Streamlit app, config-driven (same separation-of-concerns pattern as V2)
+  - Switched from `pywhispercpp` to `faster-whisper` (pre-built Windows wheels, no C++ compiler needed)
+  - Stack: Streamlit (UI), faster-whisper (local transcription), Gemini (field extraction)
+  - Run with: `python -m streamlit run Code/data_entry/app_data_entry_v1.py`
 
 ## Possible Improvements
 
