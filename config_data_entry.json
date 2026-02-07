@@ -1,46 +1,61 @@
 {
-  "use_case_name": "Patient Bloodwork Analysis",
+  "use_case_name": "Patient Registration",
   "output_directory": "./data_entry_output",
 
   "whisper_model": "base",
   "whisper_language": "en",
 
   "extraction_fields": {
-    "record_id": {
+    "patient_first_name": {
       "type": "string",
       "required": true,
-      "description": "Patient record identifier"
+      "description": "Patient first name"
     },
-    "summary": {
+    "patient_middle_initial": {
+      "type": "string",
+      "required": false,
+      "description": "Patient middle initial (single letter)"
+    },
+    "patient_last_name": {
       "type": "string",
       "required": true,
-      "description": "Brief 1-2 sentence summary of key findings"
+      "description": "Patient last name"
     },
-    "analysis": {
+    "date_of_birth": {
       "type": "string",
       "required": true,
-      "description": "Detailed analysis explaining clinical significance"
+      "description": "Patient date of birth (MM/DD/YYYY format)"
     },
-    "risk_assessment": {
+    "sex_at_birth": {
       "type": "enum",
       "required": true,
-      "description": "Overall risk level for this patient",
-      "values": ["low", "moderate", "high", "critical"]
+      "description": "Sex at birth",
+      "values": ["male", "female"]
     },
-    "patterns": {
-      "type": "array",
-      "required": false,
-      "description": "List of detected patterns (e.g., abnormal_value, correlation, risk_indicator)"
+    "address": {
+      "type": "string",
+      "required": true,
+      "description": "Patient full address (street, city, state, zip)"
     },
-    "recommended_actions": {
-      "type": "array",
-      "required": false,
-      "description": "List of recommended follow-up actions"
+    "phone_number": {
+      "type": "string",
+      "required": true,
+      "description": "Patient phone number"
     },
-    "tags": {
-      "type": "array",
-      "required": false,
-      "description": "Tags for categorization (e.g., diabetes, renal, cardiac)"
+    "emergency_contact_name": {
+      "type": "string",
+      "required": true,
+      "description": "Emergency contact full name"
+    },
+    "emergency_contact_phone": {
+      "type": "string",
+      "required": true,
+      "description": "Emergency contact phone number"
+    },
+    "emergency_contact_relation": {
+      "type": "string",
+      "required": true,
+      "description": "Emergency contact relationship to patient (e.g., spouse, parent, sibling)"
     }
   },
 

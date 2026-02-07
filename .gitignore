@@ -13,3 +13,6 @@ lancedb/
 
 # Data entry output
 data_entry_output/
+
+# SSL certificates
+.ssl/

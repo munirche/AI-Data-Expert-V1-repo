@@ -67,15 +67,11 @@ progress = engine.get_fill_progress(st.session_state.fields_data)
 col_fields, col_progress = st.columns([2, 1])
 
 with col_fields:
-    st.markdown("**Fields to capture:**")
-    field_names = list(schema.keys())
-    required = [n for n, d in schema.items() if d.get("required")]
-    optional = [n for n, d in schema.items() if not d.get("required")]
-
-    preview_text = ", ".join(f"**{n}**" for n in required)
-    if optional:
-        preview_text += ", " + ", ".join(optional)
-    st.markdown(preview_text, help="Bold = required")
+    lines = ["**Fields to capture:**"]
+    for name, definition in schema.items():
+        req = " *" if definition.get("required") else ""
+        lines.append(f"- {definition['description']}{req}")
+    st.markdown("\n".join(lines))
 
 with col_progress:
     if progress["total"] > 0:

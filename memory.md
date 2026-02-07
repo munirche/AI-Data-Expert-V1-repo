@@ -130,7 +130,8 @@ AI Data Expert V1/
 │   ├── expert_learning_system_v2.py                 # V2 generic RAG engine
 │   ├── cli_v2.py                                    # V2 CLI interface
 │   ├── export_db_v1.py                              # Database export utility (CSV/JSON)
-│   └── launch_lance_viewer.py                       # Opens Lance Data Viewer in browser
+│   ├── launch_lance_viewer.py                       # Opens Lance Data Viewer in browser
+│   └── launch_data_entry.py                         # Launches AI Data Entry Streamlit app
 ├── corpus/
 │   └── corpus.csv                                   # Ground truth test cases (15 cases)
 ├── config.json                                      # Use case configuration (V2 expert system)
@@ -205,7 +206,8 @@ This allows multiple versions to coexist during development.
   - Engine + Streamlit app, config-driven (same separation-of-concerns pattern as V2)
   - Switched from `pywhispercpp` to `faster-whisper` (pre-built Windows wheels, no C++ compiler needed)
   - Stack: Streamlit (UI), faster-whisper (local transcription), Gemini (field extraction)
-  - Run with: `python -m streamlit run Code/data_entry/app_data_entry_v1.py`
+  - Run with: `python Code/launch_data_entry.py` (or `python -m streamlit run Code/data_entry/app_data_entry_v1.py`)
+  - Note: packages must be installed in the active venv (`pip install streamlit faster-whisper`)
 
 ## Possible Improvements
 
