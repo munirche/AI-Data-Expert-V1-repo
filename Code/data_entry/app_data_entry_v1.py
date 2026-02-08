@@ -22,15 +22,16 @@ from ai_data_entry_v1 import DataEntryEngine
 # PAGE CONFIG
 # =============================================================================
 
-st.set_page_config(page_title="AI Data Entry", layout="centered")
+st.set_page_config(page_title="Virtual Medical Assistant", layout="centered")
 
-# Hide Streamlit header and footer
+# Hide Streamlit header/footer and reduce top padding
 st.markdown(
     """
     <style>
     header[data-testid="stHeader"] { display: none; }
     footer { display: none; }
     #MainMenu { display: none; }
+    .block-container { padding-top: 2rem; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -63,8 +64,11 @@ if "full_transcript" not in st.session_state:
 # HEADER
 # =============================================================================
 
-st.title("AI Data Entry")
-st.caption(f"Use case: {engine.config['use_case_name']}")
+st.title("Virtual Medical Assistant")
+st.markdown(
+    f"<p style='margin-top: -1rem; margin-bottom: 0.5rem;'>Use case: {engine.config['use_case_name']}</p>",
+    unsafe_allow_html=True,
+)
 
 st.divider()
 
@@ -79,11 +83,15 @@ progress = engine.get_fill_progress(st.session_state.fields_data)
 col_fields, col_progress = st.columns([2, 1])
 
 with col_fields:
-    lines = ["**Fields to capture:**"]
+    st.markdown("**Fields to capture:**")
     for name, definition in schema.items():
-        req = " *" if definition.get("required") else ""
-        lines.append(f"- {definition['description']}{req}")
-    st.markdown("\n".join(lines))
+        st.text_input(
+            definition["description"],
+            value="",
+            disabled=True,
+            label_visibility="visible",
+            key=f"preview_{name}",
+        )
 
 with col_progress:
     if progress["total"] > 0:
