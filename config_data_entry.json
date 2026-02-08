@@ -9,12 +9,12 @@
     "patient_first_name": {
       "type": "string",
       "required": true,
-      "description": "Patient first name"
+      "description": "Patient name"
     },
     "patient_middle_initial": {
       "type": "string",
       "required": false,
-      "description": "Patient middle initial (single letter)"
+      "description": "Patient middle initial"
     },
     "patient_last_name": {
       "type": "string",
@@ -24,7 +24,7 @@
     "date_of_birth": {
       "type": "string",
       "required": true,
-      "description": "Patient date of birth (MM/DD/YYYY format)"
+      "description": "Patient date of birth"
     },
     "sex_at_birth": {
       "type": "enum",
@@ -35,7 +35,7 @@
     "address": {
       "type": "string",
       "required": true,
-      "description": "Patient full address (street, city, state, zip)",
+      "description": "Patient full address",
       "format": "Write all numbers as plain digits with no dashes or hyphens. WRONG: 1-2-3-4 Main St. CORRECT: 1234 Main St. Example: 1234 Main St, Springfield, IL 62701"
     },
     "phone_number": {
@@ -47,7 +47,7 @@
     "emergency_contact_name": {
       "type": "string",
       "required": true,
-      "description": "Emergency contact full name",
+      "description": "Name of emergency contact",
       "format": "Capitalize first letter of each word. Example: John Smith"
     },
     "emergency_contact_phone": {
@@ -59,7 +59,7 @@
     "emergency_contact_relation": {
       "type": "string",
       "required": true,
-      "description": "Emergency contact relationship to patient (e.g., Spouse, Parent, Sibling)",
+      "description": "Emergency contact relationship to patient",
       "format": "Capitalize first letter. Example: Spouse"
     }
   },
