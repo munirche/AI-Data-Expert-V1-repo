@@ -231,7 +231,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Verified full workflow on deployed version (desktop + iPhone)
 - [x] iPhone mic works via Streamlit Cloud HTTPS
 - [ ] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
-- [ ] Point custom domain via cPanel redirect (`yourdomain.com/assistant` → `https://ai-virtual-assistant.streamlit.app/`)
+- [x] Point custom domain via cPanel redirect (`yourdomain.com/assistant` → `https://ai-virtual-assistant.streamlit.app/`)
 
 ### Phase 4: Iterative Multi-Audio Capture (complete)
 - [x] Iterative recording fills empty fields automatically (no separate button needed)
@@ -245,6 +245,12 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [ ] Desktop browsers only
 - [ ] Test Whisper model size on cloud (currently using "base")
 
+### Phase 6: Future Enhancements
+- [ ] Google Sheets integration
+- [ ] Local LLM option (Ollama)
+- [ ] Multiple output formats (CSV, etc.)
+- [ ] Batch mode for multiple recordings
+
 ### Deployment Notes (02/07/2026)
 - **Streamlit Cloud URL:** ai-virtual-assistant.streamlit.app (custom subdomain, changed from default)
 - **iPhone local HTTPS:** Does not work. iOS Safari blocks mic on self-signed certs (silent failure). Cloudflare Tunnel loaded the page but mic still didn't work via st.audio_input on iOS. Solution: deploy to Streamlit Cloud for real HTTPS.
@@ -256,12 +262,6 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - **iOS local mic access:** st.audio_input does not work on iPhone over local network (HTTP or self-signed HTTPS). Solved by deploying to Streamlit Cloud.
 - **Streamlit free tier branding:** "Powered by Streamlit" footer cannot be removed on free plan.
 - **Custom domains:** Streamlit Community Cloud (free tier) may not support fully custom domains. Can use a URL redirect from Namecheap as a workaround.
-
-### Phase 6: Future Enhancements
-- [ ] Google Sheets integration
-- [ ] Local LLM option (Ollama)
-- [ ] Multiple output formats (CSV, etc.)
-- [ ] Batch mode for multiple recordings
 
 ## HIPAA Considerations
 
