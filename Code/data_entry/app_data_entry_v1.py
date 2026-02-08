@@ -109,7 +109,7 @@ with col_fields:
             f"<span style='display:inline-block; padding:0.05rem 0.5rem; margin:0.1rem; "
             f"background:{bg}; border:1px solid {border}; border-radius:1rem; "
             f"font-size:0.85rem; color:{color};'>"
-            f"{d['description']}</span>"
+            f"{d.get('short_description', d['description'])}</span>"
         )
     st.markdown(f"**Fields to capture:**<br>{chips}", unsafe_allow_html=True)
 

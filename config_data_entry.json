@@ -9,58 +9,68 @@
     "patient_first_name": {
       "type": "string",
       "required": true,
-      "description": "Patient name"
+      "short_description": "Name",
+      "description": "Patient first name"
     },
     "patient_middle_initial": {
       "type": "string",
       "required": false,
-      "description": "Patient middle initial"
+      "short_description": "Middle initial",
+      "description": "Patient middle initial (single letter)"
     },
     "patient_last_name": {
       "type": "string",
       "required": true,
+      "short_description": "Last name",
       "description": "Patient last name"
     },
     "date_of_birth": {
       "type": "string",
       "required": true,
-      "description": "Patient date of birth",
+      "short_description": "Date of birth",
+      "description": "Patient date of birth (MM/DD/YYYY format)",
       "format": "MM/DD/YYYY. Example: 02/07/2026"
     },
     "sex_at_birth": {
       "type": "enum",
       "required": true,
+      "short_description": "Sex at birth",
       "description": "Sex at birth",
       "values": ["Male", "Female"]
     },
     "address": {
       "type": "string",
       "required": true,
-      "description": "Patient full address",
+      "short_description": "Address",
+      "description": "Patient full address (street, city, state, zip)",
       "format": "Write all numbers as plain digits with no dashes or hyphens. WRONG: 1-2-3-4 Main St. CORRECT: 1234 Main St. Example: 1234 Main St, Springfield, IL 62701"
     },
     "phone_number": {
       "type": "string",
       "required": true,
+      "short_description": "Phone number",
       "description": "Patient phone number",
       "format": "(XXX)XXXXXXX"
     },
     "emergency_contact_name": {
       "type": "string",
       "required": true,
-      "description": "Name of emergency contact",
+      "short_description": "Emergency contact",
+      "description": "Emergency contact full name. Capitalize first letter of each word.",
       "format": "Capitalize first letter of each word. Example: John Smith"
     },
     "emergency_contact_phone": {
       "type": "string",
       "required": true,
+      "short_description": "Contact phone no.",
       "description": "Emergency contact phone number",
       "format": "(XXX)XXXXXXX"
     },
     "emergency_contact_relation": {
       "type": "string",
       "required": true,
-      "description": "Emergency contact relationship to patient",
+      "short_description": "Relation to patient",
+      "description": "Emergency contact relationship to patient (e.g., Spouse, Parent, Sibling)",
       "format": "Capitalize first letter. Example: Spouse"
     }
   },
