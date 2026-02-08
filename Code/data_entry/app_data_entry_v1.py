@@ -281,7 +281,9 @@ if st.session_state.fields_data:
     # ACTION BUTTONS
     # ==========================================================================
 
-    col_download, col_clear = st.columns(2)
+    recipient = st.text_input("Recipient email")
+
+    col_download, col_email, col_clear = st.columns(3)
 
     with col_download:
         text_string = engine.to_text_string(st.session_state.fields_data)
@@ -291,6 +293,17 @@ if st.session_state.fields_data:
             file_name="data_entry.txt",
             mime="text/plain",
         )
+
+    with col_email:
+        if st.button("Send Email"):
+            if not recipient:
+                st.error("Enter a recipient email address.")
+            else:
+                try:
+                    engine.send_email(st.session_state.fields_data, recipient)
+                    st.success(f"Email sent to {recipient}")
+                except Exception as e:
+                    st.error(f"Email failed: {e}")
 
     with col_clear:
         if st.button("Clear All"):

@@ -9,7 +9,9 @@ live in config_data_entry.json.
 import io
 import json
 import os
+import smtplib
 from datetime import datetime
+from email.mime.text import MIMEText
 
 from google import genai
 
@@ -260,3 +262,33 @@ class DataEntryEngine:
             Dictionary of field name -> field definition.
         """
         return self.config["extraction_fields"]
+
+    def send_email(self, data, recipient):
+        """Send captured fields via email.
+
+        Args:
+            data: Dictionary of field values.
+            recipient: Recipient email address.
+        """
+        smtp_host = os.environ.get("SMTP_HOST")
+        smtp_port = int(os.environ.get("SMTP_PORT", "465"))
+        smtp_user = os.environ.get("SMTP_USER")
+        smtp_pass = os.environ.get("SMTP_PASSWORD")
+
+        if not all([smtp_host, smtp_user, smtp_pass]):
+            raise RuntimeError(
+                "Email not configured. Set SMTP_HOST, SMTP_USER, and "
+                "SMTP_PASSWORD in environment variables or Streamlit secrets."
+            )
+
+        body = self.to_text_string(data)
+        use_case = self.config.get("use_case_name", "Data Entry")
+
+        msg = MIMEText(body)
+        msg["Subject"] = f"{use_case} - Submission"
+        msg["From"] = smtp_user
+        msg["To"] = recipient
+
+        with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
