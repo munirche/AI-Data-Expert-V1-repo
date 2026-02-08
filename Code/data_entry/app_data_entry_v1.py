@@ -84,12 +84,31 @@ progress = engine.get_fill_progress(st.session_state.fields_data)
 col_fields, col_progress = st.columns([2, 1])
 
 with col_fields:
-    chips = "".join(
-        f"<span style='display:inline-block; padding:0.05rem 0.5rem; margin:0.1rem; "
-        f"border:1px solid #ccc; border-radius:1rem; font-size:0.85rem;'>"
-        f"{d['description']}</span>"
-        for d in schema.values()
-    )
+    has_data = len(st.session_state.fields_data) > 0
+    chips = ""
+    for name, d in schema.items():
+        if not has_data:
+            # No extraction yet: neutral style
+            bg = "transparent"
+            border = "#ccc"
+            color = "inherit"
+        else:
+            value = st.session_state.fields_data.get(name)
+            is_filled = value is not None and value != "" and value != []
+            if is_filled:
+                bg = "#d4edda"
+                border = "#28a745"
+                color = "#155724"
+            else:
+                bg = "#f8d7da"
+                border = "#dc3545"
+                color = "#721c24"
+        chips += (
+            f"<span style='display:inline-block; padding:0.05rem 0.5rem; margin:0.1rem; "
+            f"background:{bg}; border:1px solid {border}; border-radius:1rem; "
+            f"font-size:0.85rem; color:{color};'>"
+            f"{d['description']}</span>"
+        )
     st.markdown(f"**Fields to capture:**<br>{chips}", unsafe_allow_html=True)
 
 with col_progress:
