@@ -153,31 +153,30 @@ if audio_data is not None:
                 except Exception as e:
                     st.error(f"Transcription failed: {e}")
     else:
-        # One-step mode: transcribe and extract in a single action
-        if st.button("Extract", type="primary"):
-            with st.spinner("Transcribing and extracting fields..."):
-                try:
-                    transcript = engine.transcribe(audio_bytes)
-                    st.session_state.transcript = transcript
+        # Auto mode: transcribe and extract as soon as audio is recorded
+        with st.spinner("Transcribing and extracting fields..."):
+            try:
+                transcript = engine.transcribe(audio_bytes)
+                st.session_state.transcript = transcript
 
-                    if st.session_state.full_transcript:
-                        st.session_state.full_transcript += "\n\n" + transcript
-                    else:
-                        st.session_state.full_transcript = transcript
+                if st.session_state.full_transcript:
+                    st.session_state.full_transcript += "\n\n" + transcript
+                else:
+                    st.session_state.full_transcript = transcript
 
-                    extracted = engine.extract_fields(st.session_state.full_transcript)
+                extracted = engine.extract_fields(st.session_state.full_transcript)
 
-                    if "_parse_error" in extracted:
-                        st.error("LLM returned invalid JSON. Raw response shown below.")
-                        st.code(extracted.get("_raw_response", ""))
-                    else:
-                        st.session_state.fields_data = engine.merge_fields(
-                            st.session_state.fields_data, extracted
-                        )
-                        st.session_state.audio_key += 1
-                        st.rerun()
-                except Exception as e:
-                    st.error(f"Failed: {e}")
+                if "_parse_error" in extracted:
+                    st.error("LLM returned invalid JSON. Raw response shown below.")
+                    st.code(extracted.get("_raw_response", ""))
+                else:
+                    st.session_state.fields_data = engine.merge_fields(
+                        st.session_state.fields_data, extracted
+                    )
+                    st.session_state.audio_key += 1
+                    st.rerun()
+            except Exception as e:
+                st.error(f"Failed: {e}")
 
 
 # =============================================================================
