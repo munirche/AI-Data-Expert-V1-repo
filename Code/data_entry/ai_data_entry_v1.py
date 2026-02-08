@@ -23,6 +23,11 @@ class DataEntryEngine:
         self.whisper_model = None
 
         api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "GEMINI_API_KEY environment variable is not set. "
+                "Set it locally or in Streamlit secrets."
+            )
         self.llm_client = genai.Client(api_key=api_key)
 
     def _load_config(self, path):
@@ -39,7 +44,14 @@ class DataEntryEngine:
 
         model_name = self.config.get("whisper_model", "base")
         language = self.config.get("whisper_language", "en")
-        self.whisper_model = WhisperModel(model_name, device="cpu")
+
+        try:
+            self.whisper_model = WhisperModel(model_name, device="cpu")
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to load Whisper model '{model_name}'. "
+                f"Check your internet connection or disk space: {e}"
+            )
         self._whisper_language = language
 
     def transcribe(self, audio_bytes):
@@ -96,10 +108,16 @@ class DataEntryEngine:
             schema=schema_text,
         )
 
-        response = self.llm_client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt,
-        )
+        try:
+            response = self.llm_client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt,
+            )
+        except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "Resource" in error_str:
+                raise RuntimeError("Rate limit reached. Wait a minute and try again.")
+            raise RuntimeError(f"Gemini API error: {error_str}")
 
         # Parse JSON from response
         raw_text = response.text.strip()

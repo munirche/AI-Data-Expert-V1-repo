@@ -217,8 +217,8 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Hidden Streamlit header/footer/menu for cleaner UI
 
 ### Phase 2: Polish (partially complete)
-- [ ] Better form validation (required fields highlighted, missing fields flagged)
-- [ ] Error handling (mic not found, Whisper model download, Gemini API errors)
+- [x] Better form validation (color-coded pills + missing fields warning)
+- [x] Error handling (missing API key, Whisper model download failure, Gemini API rate limit)
 - [x] Improve extraction prompt based on test results (format hints, wrong/correct examples)
 - [x] Config fields support `short_description` (for UI pills) and `description` (for LLM and form labels)
 - [x] Human-readable two-column text download format (short_description: value)
@@ -231,6 +231,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Verified full workflow on deployed version (desktop + iPhone)
 - [x] iPhone mic works via Streamlit Cloud HTTPS
 - [ ] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
+- [ ] Point custom domain via Namecheap DNS (URL redirect from subdomain to Streamlit Cloud URL)
 
 ### Phase 4: Iterative Multi-Audio Capture (complete)
 - [x] Iterative recording fills empty fields automatically (no separate button needed)
@@ -242,7 +243,6 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [ ] Stream audio in chunks, run Whisper on each chunk
 - [ ] Display partial results live as user speaks
 - [ ] Desktop browsers only
-- [ ] Point custom domain via Namecheap DNS
 - [ ] Test Whisper model size on cloud (currently using "base")
 
 ### Deployment Notes (02/07/2026)
