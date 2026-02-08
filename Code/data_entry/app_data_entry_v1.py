@@ -32,6 +32,7 @@ st.markdown(
     footer { display: none; }
     #MainMenu { display: none; }
     .block-container { padding-top: 0.5rem; }
+    hr { margin-top: 0.5rem; margin-bottom: 0.5rem; }
     </style>
     """,
     unsafe_allow_html=True,
