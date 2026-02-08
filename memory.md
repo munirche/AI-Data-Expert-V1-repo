@@ -177,12 +177,13 @@ This allows multiple versions to coexist during development.
 |------------|-------|------------------------------------------|
 | 02/06/2026 | 2     | Plan, engine, Streamlit app (Phase 1 MVP). Switched from pywhispercpp to faster-whisper (no C++ compiler needed on Windows). |
 | 02/07/2026 | 2.5   | Deployed to Streamlit Cloud, iPhone testing, field format hints, UI polish (descriptions, hidden branding, download as .txt). |
+| 02/07/2026 | 1.5   | App polish: short_description config field, human-readable text download, address capitalization, recording hint caption. |
 
-**Project 2 total: 4.5 hours**
+**Project 2 total: 6 hours**
 
 ---
 
-**Total across all projects: 19.9 hours**
+**Total across all projects: 21.4 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.

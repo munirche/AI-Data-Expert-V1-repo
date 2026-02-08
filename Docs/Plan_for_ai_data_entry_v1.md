@@ -207,7 +207,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 ### Phase 1: Working MVP (complete)
 - [x] Set up `Code/data_entry/` subfolder
 - [x] Create `config_data_entry.json` with a sample use case
-- [x] Implement engine: `transcribe`, `extract_fields`, `validate_fields`, `save_json`, `to_json_string`
+- [x] Implement engine: `transcribe`, `extract_fields`, `validate_fields`, `save_json`, `to_text_string`
 - [x] Implement Streamlit app: audio recording, transcript display, extract button, editable fields
 - [x] Add download button for output
 - [x] Batch workflow: record -> stop -> transcribe -> extract -> edit -> download
@@ -220,6 +220,11 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [ ] Better form validation (required fields highlighted, missing fields flagged)
 - [ ] Error handling (mic not found, Whisper model download, Gemini API errors)
 - [x] Improve extraction prompt based on test results (format hints, wrong/correct examples)
+- [x] Config fields support `short_description` (for UI pills) and `description` (for LLM and form labels)
+- [x] Human-readable two-column text download format (short_description: value)
+- [x] Auto-extract on recording stop (no button needed)
+- [x] Color-coded pill indicators (green=filled, red=missing, neutral=no extraction)
+- [x] Recording hint caption after first extraction
 
 ### Phase 3: Web Deployment (complete)
 - [x] Deploy to Streamlit Community Cloud (free)
@@ -245,11 +250,11 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [ ] Display partial results live as user speaks
 - [ ] Desktop browsers only
 
-### Phase 5: Iterative Multi-Audio Capture
-- [ ] Add "Add More Audio" button
-- [ ] Implement `merge_fields` and `get_fill_progress`
-- [ ] Display progress bar showing % of fields filled
-- [ ] Highlight unfilled fields
+### Phase 5: Iterative Multi-Audio Capture (complete)
+- [x] Iterative recording fills empty fields automatically (no separate button needed)
+- [x] Implement `merge_fields` and `get_fill_progress`
+- [x] Display progress metric showing filled/total count and percentage
+- [x] Color-coded pills highlight unfilled fields in red
 
 ### Phase 6: Future Enhancements
 - [ ] Google Sheets integration
