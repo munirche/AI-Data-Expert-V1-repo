@@ -209,6 +209,7 @@ This allows multiple versions to coexist during development.
   - Stack: Streamlit (UI), faster-whisper (local transcription), Gemini (field extraction)
   - Run with: `python Code/launch_data_entry.py` (or `python -m streamlit run Code/data_entry/app_data_entry_v1.py`)
   - Note: packages must be installed in the active venv (`pip install streamlit faster-whisper`)
+  - App setting: `SHOW_TRANSCRIPT` in `app_data_entry_v1.py` (default False). Set True to show raw transcript for review before extraction.
 
 ## Possible Improvements
 

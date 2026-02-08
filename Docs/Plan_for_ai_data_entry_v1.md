@@ -172,19 +172,22 @@ The app is the UI layer. It calls engine methods and renders results.
 
 Run with: `streamlit run Code/data_entry/app_data_entry_v1.py`
 
+### App Settings
+
+| Setting | Location | Default | Purpose |
+|---------|----------|---------|---------|
+| `SHOW_TRANSCRIPT` | `app_data_entry_v1.py` line 105 | `False` | Show raw transcript for review before extraction. When False, transcribe and extract happen in one step. |
+
 ### Workflow
 
 ```
 1. App loads config and displays field preview
 2. User taps/clicks Record -> speaks into mic
 3. User taps/clicks Stop -> audio sent to server
-4. Whisper transcribes full audio -> transcript appears
-5. User reviews transcript in editable text area
-6. User clicks Extract -> Gemini extracts structured fields
-7. Fields displayed as editable form inputs + fill progress (e.g., 4/7 fields - 57%)
-8. User reviews, edits any field directly in the form
-9. Option A: User clicks Download -> JSON file downloads to their device
-   Option B: User clicks Add More Audio -> record again -> new fields merged -> progress updates
+4. User clicks Transcribe & Extract -> Whisper transcribes, Gemini extracts fields
+5. Fields displayed as editable form inputs + fill progress
+6. User reviews, edits any field directly in the form
+7. User clicks Download -> file downloads to their device
 ```
 
 ## Dependencies
@@ -213,7 +216,6 @@ Already installed: `google-genai`, `numpy`, `pandas`
 ### Phase 2: Polish (partially complete)
 - [ ] Better form validation (required fields highlighted, missing fields flagged)
 - [ ] Error handling (mic not found, Whisper model download, Gemini API errors)
-- [ ] Save raw audio option
 - [x] Improve extraction prompt based on test results (format hints, wrong/correct examples)
 
 ### Phase 3: Web Deployment (complete)
