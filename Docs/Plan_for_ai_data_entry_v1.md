@@ -130,7 +130,8 @@ Defines the use case without changing engine code.
     "field_name": {
       "type": "string | enum | array | object",
       "required": true/false,
-      "description": "What this field represents",
+      "short_description": "Concise label for UI pills",
+      "description": "Detailed description for LLM extraction and form labels",
       "values": ["option1", "option2"],
       "format": "Format instructions for the LLM (e.g., '(XXX)XXXXXXX')"
     }
@@ -144,6 +145,8 @@ Defines the use case without changing engine code.
 - `extraction_fields` defines what the LLM should extract from the transcript
 - `extraction_prompt_template` uses `{transcript}` and `{schema}` placeholders
 - `whisper_model` controls accuracy vs speed (tiny/base/small/medium/large)
+- `short_description` (optional) concise label shown on UI pill buttons; falls back to `description` if not set
+- `description` detailed field description used by the LLM for extraction and shown as form labels
 - `format` (optional) tells the LLM how to format specific field values
 - Changing this file changes the entire use case
 

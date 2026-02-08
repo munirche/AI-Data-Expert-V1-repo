@@ -133,6 +133,9 @@ st.subheader("Record Audio")
 
 audio_data = st.audio_input("Tap the microphone to record", key=f"audio_{st.session_state.audio_key}")
 
+if st.session_state.fields_data:
+    st.caption("You can keep recording to fill in empty fields.")
+
 if audio_data is not None:
     audio_bytes = audio_data.getvalue()
 
