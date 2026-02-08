@@ -31,7 +31,7 @@ st.markdown(
     header[data-testid="stHeader"] { display: none; }
     footer { display: none; }
     #MainMenu { display: none; }
-    .block-container { padding-top: 2rem; }
+    .block-container { padding-top: 0.5rem; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -66,7 +66,7 @@ if "full_transcript" not in st.session_state:
 
 st.title("Virtual Medical Assistant")
 st.markdown(
-    f"<p style='margin-top: -1rem; margin-bottom: 0.5rem;'>Use case: {engine.config['use_case_name']}</p>",
+    f"<p style='margin-top: -1rem; margin-bottom: -0.5rem;'>Use case: {engine.config['use_case_name']}</p>",
     unsafe_allow_html=True,
 )
 
