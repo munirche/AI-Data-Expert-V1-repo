@@ -59,6 +59,8 @@ if "transcript" not in st.session_state:
     st.session_state.transcript = ""
 if "full_transcript" not in st.session_state:
     st.session_state.full_transcript = ""
+if "audio_key" not in st.session_state:
+    st.session_state.audio_key = 0
 
 
 # =============================================================================
@@ -129,7 +131,7 @@ SHOW_TRANSCRIPT = False
 
 st.subheader("Record Audio")
 
-audio_data = st.audio_input("Tap the microphone to record")
+audio_data = st.audio_input("Tap the microphone to record", key=f"audio_{st.session_state.audio_key}")
 
 if audio_data is not None:
     audio_bytes = audio_data.getvalue()
@@ -152,7 +154,7 @@ if audio_data is not None:
                     st.error(f"Transcription failed: {e}")
     else:
         # One-step mode: transcribe and extract in a single action
-        if st.button("Transcribe & Extract", type="primary"):
+        if st.button("Extract", type="primary"):
             with st.spinner("Transcribing and extracting fields..."):
                 try:
                     transcript = engine.transcribe(audio_bytes)
@@ -172,6 +174,7 @@ if audio_data is not None:
                         st.session_state.fields_data = engine.merge_fields(
                             st.session_state.fields_data, extracted
                         )
+                        st.session_state.audio_key += 1
                         st.rerun()
                 except Exception as e:
                     st.error(f"Failed: {e}")
