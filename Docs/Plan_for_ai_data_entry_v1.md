@@ -231,7 +231,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Verified full workflow on deployed version (desktop + iPhone)
 - [x] iPhone mic works via Streamlit Cloud HTTPS
 - [ ] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
-- [ ] Point custom domain via Namecheap DNS (URL redirect from subdomain to Streamlit Cloud URL)
+- [ ] Point custom domain via cPanel redirect (`yourdomain.com/assistant` → `https://ai-virtual-assistant.streamlit.app/`)
 
 ### Phase 4: Iterative Multi-Audio Capture (complete)
 - [x] Iterative recording fills empty fields automatically (no separate button needed)
@@ -246,7 +246,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [ ] Test Whisper model size on cloud (currently using "base")
 
 ### Deployment Notes (02/07/2026)
-- **Streamlit Cloud URL:** ai-data-expert-v1-repo-u9czepkhfeuddbsb8zxwmi.streamlit.app
+- **Streamlit Cloud URL:** ai-virtual-assistant.streamlit.app (custom subdomain, changed from default)
 - **iPhone local HTTPS:** Does not work. iOS Safari blocks mic on self-signed certs (silent failure). Cloudflare Tunnel loaded the page but mic still didn't work via st.audio_input on iOS. Solution: deploy to Streamlit Cloud for real HTTPS.
 - **Streamlit version:** Pinned to `>=1.44.0` (Cloud installed 1.19.0 by default, incompatible with altair 6.x)
 - **Python version on Cloud:** 3.12 (3.14 not available, code is compatible)
