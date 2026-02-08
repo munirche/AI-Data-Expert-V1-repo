@@ -85,7 +85,7 @@ col_fields, col_progress = st.columns([2, 1])
 
 with col_fields:
     chips = "".join(
-        f"<span style='display:inline-block; padding:0.15rem 0.5rem; margin:0.15rem; "
+        f"<span style='display:inline-block; padding:0.05rem 0.5rem; margin:0.1rem; "
         f"border:1px solid #ccc; border-radius:1rem; font-size:0.85rem;'>"
         f"{d['description']}</span>"
         for d in schema.values()
