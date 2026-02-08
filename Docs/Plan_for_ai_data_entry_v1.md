@@ -165,8 +165,9 @@ DataEntryEngine
 +-- validate_fields(data)           # Check required fields from config
 +-- get_fill_progress(data)         # Return filled/total count and percentage
 +-- save_json(data, filename)       # Save to local output directory
-+-- to_json_string(data)            # Return JSON string (for download button)
++-- to_text_string(data)            # Return two-column text (for download/email)
 +-- get_fields_schema()             # Return field definitions from config
++-- send_email(data, recipient)     # Send fields via SMTP email
 ```
 
 ### Streamlit App: `app_data_entry_v1.py`
@@ -191,6 +192,7 @@ Run with: `streamlit run Code/data_entry/app_data_entry_v1.py`
 5. Fields displayed as editable form inputs + fill progress
 6. User reviews, edits any field directly in the form
 7. User clicks Download -> file downloads to their device
+8. User enters recipient email, clicks Send Email -> data sent via SMTP
 ```
 
 ## Dependencies
@@ -216,7 +218,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Form shows field descriptions instead of field keys
 - [x] Hidden Streamlit header/footer/menu for cleaner UI
 
-### Phase 2: Polish (partially complete)
+### Phase 2: Polish (complete)
 - [x] Better form validation (color-coded pills + missing fields warning)
 - [x] Error handling (missing API key, Whisper model download failure, Gemini API rate limit)
 - [x] Improve extraction prompt based on test results (format hints, wrong/correct examples)
@@ -226,11 +228,11 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Color-coded pill indicators (green=filled, red=missing, neutral=no extraction)
 - [x] Recording hint caption after first extraction
 
-### Phase 3: Web Deployment (partially complete)
+### Phase 3: Web Deployment (complete)
 - [x] Deploy to Streamlit Community Cloud (free)
 - [x] Verified full workflow on deployed version (desktop + iPhone)
 - [x] iPhone mic works via Streamlit Cloud HTTPS
-- [ ] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
+- [x] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
 - [x] Point custom domain via cPanel redirect (`yourdomain.com/assistant` → `https://ai-virtual-assistant.streamlit.app/`)
 
 ### Phase 4: Iterative Multi-Audio Capture (complete)
@@ -257,6 +259,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - **Streamlit version:** Pinned to `>=1.44.0` (Cloud installed 1.19.0 by default, incompatible with altair 6.x)
 - **Python version on Cloud:** 3.12 (3.14 not available, code is compatible)
 - **Cache note:** After config changes, must "Reboot app" from Manage App menu to clear `@st.cache_resource`
+- **SMTP email:** Uses SMTP_SSL (port 465) via Namecheap email server. Credentials stored in Streamlit Cloud secrets (Manage App > Settings > Secrets): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`. For local testing, use `.streamlit/secrets.toml` (already in .gitignore). No new dependencies -- uses Python built-in `smtplib` and `email.mime.text`.
 
 ### Known Issues
 - **iOS local mic access:** st.audio_input does not work on iPhone over local network (HTTP or self-signed HTTPS). Solved by deploying to Streamlit Cloud.
@@ -270,6 +273,7 @@ Already installed: `google-genai`, `numpy`, `pandas`
 | Microphone capture | Local/Browser | None |
 | Speech-to-text (Whisper) | Local | None |
 | Field extraction (Gemini) | Cloud | Yes - development only, simulated data |
+| Email sending (SMTP) | Cloud (Namecheap) | Yes - data in email body, encrypted in transit (SSL) |
 | JSON storage | Local | None |
 
 For production with real PHI, swap Gemini for a local LLM (config change, not code change).

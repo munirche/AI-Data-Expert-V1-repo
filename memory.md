@@ -40,6 +40,10 @@ docker run --rm -p 8080:8080 -v "C:/Users/munir/Projects/AI Data Expert V1/exper
 | Variable | Purpose | How to Set (Windows) |
 |----------|---------|---------------------|
 | GEMINI_API_KEY | Google Gemini API authentication | `[System.Environment]::SetEnvironmentVariable('GEMINI_API_KEY', 'your-key', 'User')` |
+| SMTP_HOST | Email server hostname | Streamlit secrets (Manage App > Settings > Secrets) |
+| SMTP_PORT | Email server port (default 465) | Streamlit secrets |
+| SMTP_USER | Email sender address | Streamlit secrets |
+| SMTP_PASSWORD | Email account password | Streamlit secrets |
 
 ## Preferences
 
@@ -178,12 +182,13 @@ This allows multiple versions to coexist during development.
 | 02/06/2026 | 2     | Plan, engine, Streamlit app (Phase 1 MVP). Switched from pywhispercpp to faster-whisper (no C++ compiler needed on Windows). |
 | 02/07/2026 | 2.5   | Deployed to Streamlit Cloud, iPhone testing, field format hints, UI polish (descriptions, hidden branding, download as .txt). |
 | 02/07/2026 | 1.5   | App polish: short_description config field, human-readable text download, address capitalization, recording hint caption. |
+| 02/07/2026 | 1     | Send email feature: SMTP_SSL via Namecheap, recipient input + Send Email button in UI, secrets on Streamlit Cloud. |
 
-**Project 2 total: 6 hours**
+**Project 2 total: 7 hours**
 
 ---
 
-**Total across all projects: 21.4 hours**
+**Total across all projects: 22.4 hours**
 
 ## Notes
 - **01/29/2026:** Project initialized. Code folder contains RAG implementation from Claude research session - needs review, understanding, and testing before use.
