@@ -284,10 +284,10 @@ if st.session_state.fields_data:
     col_download, col_clear = st.columns(2)
 
     with col_download:
-        json_string = engine.to_json_string(st.session_state.fields_data)
+        text_string = engine.to_text_string(st.session_state.fields_data)
         st.download_button(
             label="Download",
-            data=json_string,
+            data=text_string,
             file_name="data_entry.txt",
             mime="text/plain",
         )

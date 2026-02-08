@@ -217,16 +217,23 @@ class DataEntryEngine:
 
         return filepath
 
-    def to_json_string(self, data):
-        """Convert data dictionary to formatted JSON string.
+    def to_text_string(self, data):
+        """Convert data to a human-readable two-column text format.
 
         Args:
-            data: Dictionary to convert.
+            data: Dictionary of field values.
 
         Returns:
-            Formatted JSON string.
+            Formatted text string with short_description and value columns.
         """
-        return json.dumps(data, indent=2)
+        fields = self.config["extraction_fields"]
+        lines = []
+        for name, definition in fields.items():
+            label = definition.get("short_description", definition.get("description", name))
+            value = data.get(name)
+            display_value = str(value) if value is not None else ""
+            lines.append(f"{label}: {display_value}")
+        return "\n".join(lines)
 
     def get_fields_schema(self):
         """Return field definitions from config.
