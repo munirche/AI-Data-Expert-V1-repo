@@ -100,6 +100,9 @@ with col_progress:
 # AUDIO RECORDING
 # =============================================================================
 
+# Set to True to show transcript for review before extracting
+SHOW_TRANSCRIPT = False
+
 st.subheader("Record Audio")
 
 audio_data = st.audio_input("Tap the microphone to record")
@@ -107,28 +110,54 @@ audio_data = st.audio_input("Tap the microphone to record")
 if audio_data is not None:
     audio_bytes = audio_data.getvalue()
 
-    if st.button("Transcribe"):
-        with st.spinner("Transcribing audio..."):
-            try:
-                transcript = engine.transcribe(audio_bytes)
-                st.session_state.transcript = transcript
+    if SHOW_TRANSCRIPT:
+        # Two-step mode: transcribe first, then extract separately
+        if st.button("Transcribe"):
+            with st.spinner("Transcribing audio..."):
+                try:
+                    transcript = engine.transcribe(audio_bytes)
+                    st.session_state.transcript = transcript
 
-                # Accumulate transcript across recordings
-                if st.session_state.full_transcript:
-                    st.session_state.full_transcript += "\n\n" + transcript
-                else:
-                    st.session_state.full_transcript = transcript
+                    if st.session_state.full_transcript:
+                        st.session_state.full_transcript += "\n\n" + transcript
+                    else:
+                        st.session_state.full_transcript = transcript
 
-                st.rerun()
-            except Exception as e:
-                st.error(f"Transcription failed: {e}")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Transcription failed: {e}")
+    else:
+        # One-step mode: transcribe and extract in a single action
+        if st.button("Transcribe & Extract", type="primary"):
+            with st.spinner("Transcribing and extracting fields..."):
+                try:
+                    transcript = engine.transcribe(audio_bytes)
+                    st.session_state.transcript = transcript
+
+                    if st.session_state.full_transcript:
+                        st.session_state.full_transcript += "\n\n" + transcript
+                    else:
+                        st.session_state.full_transcript = transcript
+
+                    extracted = engine.extract_fields(st.session_state.full_transcript)
+
+                    if "_parse_error" in extracted:
+                        st.error("LLM returned invalid JSON. Raw response shown below.")
+                        st.code(extracted.get("_raw_response", ""))
+                    else:
+                        st.session_state.fields_data = engine.merge_fields(
+                            st.session_state.fields_data, extracted
+                        )
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"Failed: {e}")
 
 
 # =============================================================================
-# TRANSCRIPT DISPLAY
+# TRANSCRIPT DISPLAY (only shown when SHOW_TRANSCRIPT is enabled)
 # =============================================================================
 
-if st.session_state.full_transcript:
+if SHOW_TRANSCRIPT and st.session_state.full_transcript:
     st.subheader("Transcript")
     edited_transcript = st.text_area(
         "Review and edit transcript before extracting",
@@ -137,7 +166,6 @@ if st.session_state.full_transcript:
     )
     st.session_state.full_transcript = edited_transcript
 
-    # Extract button
     if st.button("Extract Fields", type="primary"):
         with st.spinner("Extracting fields..."):
             try:
@@ -147,7 +175,6 @@ if st.session_state.full_transcript:
                     st.error("LLM returned invalid JSON. Raw response shown below.")
                     st.code(extracted.get("_raw_response", ""))
                 else:
-                    # Merge with existing fields (new fills empty slots)
                     st.session_state.fields_data = engine.merge_fields(
                         st.session_state.fields_data, extracted
                     )
