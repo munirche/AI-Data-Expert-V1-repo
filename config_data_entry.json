@@ -24,7 +24,8 @@
     "date_of_birth": {
       "type": "string",
       "required": true,
-      "description": "Patient date of birth"
+      "description": "Patient date of birth",
+      "format": "MM/DD/YYYY. Example: 02/07/2026"
     },
     "sex_at_birth": {
       "type": "enum",
