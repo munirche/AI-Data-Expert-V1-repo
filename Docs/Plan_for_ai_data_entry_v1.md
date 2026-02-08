@@ -230,9 +230,20 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Deploy to Streamlit Community Cloud (free)
 - [x] Verified full workflow on deployed version (desktop + iPhone)
 - [x] iPhone mic works via Streamlit Cloud HTTPS
+- [ ] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
+
+### Phase 4: Iterative Multi-Audio Capture (complete)
+- [x] Iterative recording fills empty fields automatically (no separate button needed)
+- [x] Implement `merge_fields` and `get_fill_progress`
+- [x] Display progress metric showing filled/total count and percentage
+- [x] Color-coded pills highlight unfilled fields in red
+
+### Phase 5: Real-Time Transcription (Desktop Enhancement)
+- [ ] Stream audio in chunks, run Whisper on each chunk
+- [ ] Display partial results live as user speaks
+- [ ] Desktop browsers only
 - [ ] Point custom domain via Namecheap DNS
 - [ ] Test Whisper model size on cloud (currently using "base")
-- [ ] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
 
 ### Deployment Notes (02/07/2026)
 - **Streamlit Cloud URL:** ai-data-expert-v1-repo-u9czepkhfeuddbsb8zxwmi.streamlit.app
@@ -242,20 +253,9 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - **Cache note:** After config changes, must "Reboot app" from Manage App menu to clear `@st.cache_resource`
 
 ### Known Issues
-- **Audio cut short (02/06/2026):** During first desktop test, audio/transcription was cut short. Not yet determined if it's the recording (st.audio_input) or the transcription (faster-whisper) truncating.
 - **iOS local mic access:** st.audio_input does not work on iPhone over local network (HTTP or self-signed HTTPS). Solved by deploying to Streamlit Cloud.
 - **Streamlit free tier branding:** "Powered by Streamlit" footer cannot be removed on free plan.
-
-### Phase 4: Real-Time Transcription (Desktop Enhancement)
-- [ ] Stream audio in chunks, run Whisper on each chunk
-- [ ] Display partial results live as user speaks
-- [ ] Desktop browsers only
-
-### Phase 5: Iterative Multi-Audio Capture (complete)
-- [x] Iterative recording fills empty fields automatically (no separate button needed)
-- [x] Implement `merge_fields` and `get_fill_progress`
-- [x] Display progress metric showing filled/total count and percentage
-- [x] Color-coded pills highlight unfilled fields in red
+- **Custom domains:** Streamlit Community Cloud (free tier) may not support fully custom domains. Can use a URL redirect from Namecheap as a workaround.
 
 ### Phase 6: Future Enhancements
 - [ ] Google Sheets integration
