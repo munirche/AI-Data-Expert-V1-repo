@@ -66,7 +66,7 @@ if "full_transcript" not in st.session_state:
 
 st.title("Virtual Medical Assistant")
 st.markdown(
-    f"<p style='margin-top: -1rem; margin-bottom: -0.5rem;'>Use case: {engine.config['use_case_name']}</p>",
+    f"<p style='margin-top: -1rem; margin-bottom: -0.5rem;'>{engine.config['use_case_name']}</p>",
     unsafe_allow_html=True,
 )
 
