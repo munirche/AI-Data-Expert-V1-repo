@@ -226,12 +226,13 @@ Already installed: `google-genai`, `numpy`, `pandas`
 - [x] Color-coded pill indicators (green=filled, red=missing, neutral=no extraction)
 - [x] Recording hint caption after first extraction
 
-### Phase 3: Web Deployment (complete)
+### Phase 3: Web Deployment (partially complete)
 - [x] Deploy to Streamlit Community Cloud (free)
 - [x] Verified full workflow on deployed version (desktop + iPhone)
 - [x] iPhone mic works via Streamlit Cloud HTTPS
 - [ ] Point custom domain via Namecheap DNS
 - [ ] Test Whisper model size on cloud (currently using "base")
+- [ ] Send data via email (SMTP via Namecheap email server, credentials in Streamlit secrets)
 
 ### Deployment Notes (02/07/2026)
 - **Streamlit Cloud URL:** ai-data-expert-v1-repo-u9czepkhfeuddbsb8zxwmi.streamlit.app
